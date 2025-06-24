@@ -38,6 +38,8 @@ theme:
     - search.highlight
     - content.code.annotate
     - content.code.copy
+    - content.cards
+    - header.autohide
 
 # Extensions
 markdown_extensions:
@@ -49,6 +51,15 @@ markdown_extensions:
   - admonition
   - toc:
       permalink: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+# Extra CSS for custom styling
+extra_css:
+  - stylesheets/extra.css
 
 # Navigation structure
 nav:
