@@ -1,0 +1,57 @@
+# Project information
+site_name: AFM - Agent Flavored Markdown
+site_url: http://localhost/
+site_author: hasithaa
+site_description: >-
+  A specification for describing AI agents in a portable and interoperable way.
+
+# Repository
+repo_name: hasithaa/afm
+repo_url: https://github.com/hasithaa/afm
+
+# Copyright
+copyright: Copyright &copy; 2025 
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.code.copy
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - toc:
+      permalink: true
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Specification: spec.md
+  - 'Try It!': /try-it/
