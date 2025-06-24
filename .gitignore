@@ -1,0 +1,16 @@
+# Build artifacts
+target/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Docker
+.dockerignore
+*.env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
