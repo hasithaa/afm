@@ -3,54 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Try AFM - Coming Soon</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: #212529;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            padding: 2rem;
-        }
-        h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-        p {
-            font-size: 1.25rem;
-            color: #6c757d;
-            margin-bottom: 2rem;
-        }
-        .home-link {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            font-weight: 700;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .home-link:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>AFM Try-it</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Coming Soon</h1>
-        <p>Our interactive editor and deployment playground are under construction. Stay tuned!</p>
-        <a href="/" class="home-link">Back to Home</a>
+    <div id="debug" class="debug-info" style="display: none;"></div>
+
+    <div class="container-fluid">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <h2>AFM Try-it</h2>
+            <div>
+                <a href="http://localhost:8080/specification/" class="btn btn-outline-primary me-2">Read Spec</a>
+                <a href="http://localhost:8080/" class="btn btn-outline-secondary">Home</a>
+            </div>
+        </div>
+
+        <!-- Home Page -->
+        <div class="home-container" id="home-page">
+            <p class="lead mb-4">Create, edit, and run AFM (Agent Format Markup) files</p>
+            <div class="d-grid gap-3 col-6 mx-auto">
+                <button id="create-new-btn" class="btn btn-primary btn-lg">Create New AFM</button>
+                <button id="run-afm-btn" class="btn btn-secondary btn-lg disabled-button" disabled title="Feature coming soon">Run AFM (Coming Soon)</button>
+                
+                <!-- File Upload Option -->
+                <div class="file-upload-container">
+                    <h4>Upload AFM File</h4>
+                    <div class="file-upload-area" id="file-upload-area">
+                        <p>Click here or drag and drop AFM file</p>
+                        <input type="file" id="file-upload-input" accept=".md,.afm.md,.afm" style="display: none;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Saved AFMs Section -->
+            <div class="saved-afms" id="saved-afms-section">
+                <h3>Saved AFM Files</h3>
+                <div id="saved-afms-list">
+                    <!-- Saved AFM items will be loaded here dynamically -->
+                    <p class="text-muted" id="no-saved-afms">No saved AFM files found</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor Page - Redesigned with IDE layout -->
+        <div class="editor-container" id="editor-page">
+            <!-- Global Action Bar -->
+            <div class="action-bar">
+                <div>
+                    <h3 class="mb-0">AFM Editor</h3>
+                </div>
+                <div class="action-buttons">
+                    <button id="save-local-btn" class="btn btn-success">Save to Browser</button>
+                    <button id="download-btn" class="btn btn-outline-primary">Download</button>
+                    <span class="coming-soon-btn">Run</span>
+                    <button id="back-to-home" class="btn btn-outline-secondary">Back</button>
+                </div>
+            </div>
+            
+            <div class="alert">
+                Create your AFM file by filling in the metadata form and writing your agent's content in markdown format.
+                <a href="http://localhost:8080/specification/" target="_blank">View the AFM Specification</a> for more guidance.
+            </div>
+            
+            <!-- Two-panel IDE Layout -->
+            <div class="ide-layout">
+                <!-- Left Panel - Editor -->
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <h4 class="mb-0">Agent Definition</h4>
+                        <div class="editor-mode-toggle">
+                            <button class="active" data-mode="write">Write</button>
+                            <button data-mode="preview">Preview</button>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-content">
+                        <div id="markdown-editor-container" class="h-100">
+                            <textarea id="markdown-editor" style="display: none;">
+# Role
+Describe your agent's role here...
+
+# Capabilities
+- First capability
+- Second capability
+
+## Instructions
+- First instruction
+- Second instruction
+                            </textarea>
+                        </div>
+                        <div id="editor-preview" class="p-3" style="display: none; height: 100%; overflow: auto;"></div>
+                    </div>
+                    
+                    <div class="editor-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Use markdown to format your agent's definition</small>
+                            <button id="preview-btn" class="btn btn-primary btn-sm">Full Preview</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Panel - Metadata -->
+                <div class="metadata-panel">
+                    <div class="metadata-nav">
+                        <div class="metadata-nav-link active" data-section="basic">Basic Information</div>
+                        <div class="metadata-nav-link" data-section="authors">Authors & Provider</div>
+                        <div class="metadata-nav-link" data-section="additional">Additional Details</div>
+                    </div>
+                    
+                    <div class="metadata-sections">
+                        <!-- Basic Information Section -->
+                        <div class="metadata-section" id="metadata-basic">
+                            <div class="form-group">
+                                <label for="agent-identifier">Agent Identifier</label>
+                                <input type="text" class="form-control" id="agent-identifier" placeholder="e.g. math-tutor">
+                                <small>Used as the filename when saving. Lowercase with hyphens.</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="agent-name">Name</label>
+                                <input type="text" class="form-control" id="agent-name" placeholder="e.g. Math Tutor">
+                                <small>A human-readable name for your agent.</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="agent-description">Description</label>
+                                <textarea class="form-control" id="agent-description" rows="2" placeholder="Brief description of the agent's purpose"></textarea>
+                                <small>A short summary of what your agent does.</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="agent-version">Version</label>
+                                <input type="text" class="form-control" id="agent-version" placeholder="1.0.0">
+                                <small>Semantic versioning (MAJOR.MINOR.PATCH).</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="agent-namespace">Namespace</label>
+                                <input type="text" class="form-control" id="agent-namespace" placeholder="e.g. education">
+                                <small>Category or domain for your agent.</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="agent-license">License</label>
+                                <input type="text" class="form-control" id="agent-license" placeholder="e.g. MIT, Apache 2.0">
+                                <small>The license under which this agent is released.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Authors & Provider Section -->
+                        <div class="metadata-section" id="metadata-authors" style="display:none;">
+                            <div class="form-group">
+                                <label>Authors</label>
+                                <div class="author-tags" id="authors-display">
+                                    <!-- Author tags will be displayed here -->
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="author-name-input" placeholder="Name">
+                                    <input type="text" class="form-control" id="author-email-input" placeholder="Email">
+                                    <button class="btn btn-outline-secondary" id="add-author-btn">Add</button>
+                                </div>
+                                <small>Format: Name &lt;email@example.com&gt;</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Provider</label>
+                                <input type="text" class="form-control mb-2" id="provider-organization" placeholder="Organization name">
+                                <input type="text" class="form-control" id="provider-url" placeholder="URL (e.g. https://example.com)">
+                                <small>The organization providing this agent and its website.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Details Section -->
+                        <div class="metadata-section" id="metadata-additional" style="display:none;">
+                            <div class="form-group">
+                                <label for="agent-iconurl">Icon URL</label>
+                                <input type="text" class="form-control" id="agent-iconurl" placeholder="https://example.com/icon.png">
+                                <small>URL to an image that represents your agent.</small>
+                            </div>
+                            
+                            <!-- Other future metadata fields can be added here -->
+                            <div class="text-muted p-3 text-center mt-4">
+                                <p>Additional configuration options will be available in future versions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Page -->
+        <div class="preview-container" id="preview-page">
+            <div class="action-bar">
+                <div>
+                    <h3 class="mb-0">AFM Preview</h3>
+                </div>
+                <div class="action-buttons">
+                    <button id="edit-btn" class="btn btn-primary">Edit</button>
+                    <button id="save-local-preview-btn" class="btn btn-success">Save to Browser</button>
+                    <button id="preview-download-btn" class="btn btn-outline-primary">Download</button>
+                    <button id="back-to-home" class="btn btn-outline-secondary">Back</button>
+                </div>
+            </div>
+
+            <div id="preview-content" class="mb-3"></div>
+        </div>
+
+        <!-- AFM Identifier Modal -->
+        <div class="afm-identifier-modal" id="afm-identifier-modal">
+            <div class="afm-identifier-modal-content">
+                <h4>Save AFM File</h4>
+                <div class="mb-3">
+                    <label for="modal-agent-identifier" class="form-label">Agent Identifier</label>
+                    <input type="text" class="form-control" id="modal-agent-identifier" placeholder="e.g. math-tutor">
+                    <small class="form-text text-muted">This will be used as the filename: [identifier].afm.md</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preview</label>
+                    <div id="afm-preview" class="code-preview"></div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-secondary me-2" id="modal-cancel-btn">Cancel</button>
+                    <button class="btn btn-primary" id="modal-save-btn">Save</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml/dist/js-yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

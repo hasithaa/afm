@@ -56,13 +56,20 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
 
 # Extra CSS for custom styling
 extra_css:
   - stylesheets/extra.css
 
+# extra:
+#   version:
+#     provider: mike
+#     default: stable
+
 # Navigation structure
 nav:
   - Home: index.md
-  - Specification: spec.md
+  - Specification: specification.md
   - 'Try It!': /try-it/

@@ -1,0 +1,537 @@
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+    margin: 0;
+    padding: 20px;
+}
+.container-fluid {
+    max-width: 1400px;
+}
+.home-container {
+    text-align: center;
+    padding: 30px 20px;
+}
+.editor-container {
+    display: none;
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+#preview-content {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 20px;
+    background-color: white;
+}
+.preview-container {
+    display: none;
+}
+.disabled-button {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.alert {
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: #e3f2fd;
+    border-color: #bde0fe;
+    color: #0c63e4;
+    border-radius: 4px;
+}
+.alert a {
+    color: #0c63e4;
+    font-weight: 600;
+}
+.metadata-sidebar {
+    border-radius: 4px;
+    overflow: hidden;
+}
+.metadata-tabs {
+    background-color: #f1f3f5;
+    border-right: none;
+}
+.nav-tabs {
+    border-bottom: none;
+}
+.nav-tabs .nav-link {
+    border: none;
+    color: #495057;
+    padding: 12px 15px;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+}
+.nav-tabs .nav-link:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-left: 3px solid rgba(0, 123, 255, 0.5);
+}
+.nav-tabs .nav-link.active {
+    background-color: #f8f9fa;
+    border-left: 3px solid #007bff;
+    font-weight: 600;
+    color: #007bff;
+}
+.metadata-panel {
+    display: none;
+    border: 1px solid #dee2e6;
+    border-radius: 0 4px 4px 0;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: white;
+    height: 100%;
+}
+.metadata-panel.active {
+    display: block;
+}
+.author-entry {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.author-entry input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.author-entry button {
+    flex-shrink: 0;
+}
+.authors-container {
+    margin-bottom: 15px;
+}
+/* Custom styles for EasyMDE editor */
+.EasyMDEContainer {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+.editor-toolbar {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background-color: #f8f9fa;
+}
+.CodeMirror {
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    font-size: 15px;
+}
+.CodeMirror .cm-header-1 {
+    font-size: 1.5em;
+}
+.CodeMirror .cm-header-2 {
+    font-size: 1.3em;
+}
+.CodeMirror .cm-header-3 {
+    font-size: 1.1em;
+}
+.editor-preview h1, .editor-preview-side h1 {
+    font-size: 1.5em;
+}
+.editor-preview h2, .editor-preview-side h2 {
+    font-size: 1.3em;
+}
+.editor-preview h3, .editor-preview-side h3 {
+    font-size: 1.1em;
+}
+.editor-statusbar {
+    border-top: 1px solid #dee2e6;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #6c757d;
+    background-color: #f8f9fa;
+}
+/* Debug styles */
+.debug-info {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 9999;
+}
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+.top-nav h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0;
+}
+.saved-afms {
+    margin-top: 30px;
+    border-top: 1px solid #dee2e6;
+    padding-top: 20px;
+}
+.saved-afms h3 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+.saved-afm-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s;
+}
+.saved-afm-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.saved-afm-title {
+    font-weight: 600;
+    margin-right: 10px;
+    font-size: 1rem;
+}
+.saved-afm-actions {
+    display: flex;
+    gap: 8px;
+}
+.afm-identifier-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.afm-identifier-modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.code-preview {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    margin-bottom: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 14px;
+}
+.agent-id-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+.editor-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+.file-upload-container {
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+}
+.file-upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.file-upload-area:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+input[readonly] {
+    background-color: #e9ecef;
+}
+.main-content {
+    margin-top: 20px;
+}
+.editor-section {
+    margin-bottom: 20px;
+}
+.editor-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 15px;
+}
+.author-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f1f3f5;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+.author-badge button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 0 0 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.add-author-btn {
+    background: none;
+    border: 1px dashed #adb5bd;
+    color: #495057;
+    border-radius: 20px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.add-author-btn:hover {
+    background-color: #e9ecef;
+}
+
+/* Two-panel "IDE" layout styles */
+.ide-layout {
+    display: flex;
+    height: calc(100vh - 120px);
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: white;
+}
+
+.editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #dee2e6;
+    overflow: hidden;
+}
+
+.metadata-panel {
+    width: 340px;
+    overflow-y: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editor-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.editor-content {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+}
+
+/* Special styling for the EasyMDE editor to make it fill the panel */
+.editor-content .EasyMDEContainer {
+    height: 100%;
+    border: none;
+}
+
+.editor-content .EasyMDEContainer .CodeMirror {
+    height: 100%;
+    border: none;
+}
+
+/* Preview toggle styling */
+.editor-mode-toggle {
+    display: flex;
+    background-color: #f1f3f5;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+.editor-mode-toggle button {
+    padding: 6px 12px;
+    border: none;
+    background: none;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+}
+
+.editor-mode-toggle button.active {
+    background-color: #ffffff;
+    color: #007bff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Metadata panel styling */
+.metadata-section {
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px;
+}
+
+.metadata-section h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.metadata-nav {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.metadata-nav-link {
+    display: block;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    color: #495057;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.metadata-nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.metadata-nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.metadata-sections {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 15px;
+}
+
+/* Action button styling */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.coming-soon-btn {
+    color: #6c757d;
+    background: none;
+    border: 1px dashed #ced4da;
+    pointer-events: none;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.coming-soon-btn::after {
+    content: "Coming Soon";
+    font-size: 0.7rem;
+    margin-left: 5px;
+    background: #f1f3f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+/* Enhanced form styling */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #6c757d;
+}
+
+.preview-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Author tags styling */
+.author-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.author-tag {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 16px;
+    padding: 3px 10px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+.author-tag button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 5px;
+    line-height: 1;
+    padding: 0 3px;
+}

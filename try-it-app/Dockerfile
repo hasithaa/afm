@@ -1,14 +1,18 @@
-# Use a lightweight Nginx image to serve static content
-FROM nginx:1.25-alpine
+# Use a Node.js image to serve the application
+FROM node:18-alpine
 
-# Remove the default Nginx welcome page
-RUN rm /usr/share/nginx/html/index.html
+# Set working directory
+WORKDIR /app
 
-# Copy our custom 'coming soon' page to the web root
-COPY index.html /usr/share/nginx/html
+# Copy package.json and install dependencies
+COPY package.json .
+RUN npm install
 
-# Expose port 80
-EXPOSE 80
+# Copy the rest of the application
+COPY . .
 
-# The default Nginx command will start the server
-CMD ["nginx", "-g", "daemon off;"]
+# Expose port 8080
+EXPOSE 8080
+
+# Start the application
+CMD ["npm", "start"]
