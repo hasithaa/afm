@@ -23,7 +23,7 @@
 
         <!-- Home Page -->
         <div class="home-container" id="home-page">
-            <p class="lead mb-4">Create, edit, and run AFM (Agent Format Markup) files</p>
+            <p class="lead mb-4">Create, edit, and run AFM (Agent Flavored Markdown) files</p>
             <div class="d-grid gap-3 col-6 mx-auto">
                 <button id="create-new-btn" class="btn btn-primary btn-lg">Create New AFM</button>
                 <button id="run-afm-btn" class="btn btn-secondary btn-lg disabled-button" disabled title="Feature coming soon">Run AFM (Coming Soon)</button>
@@ -64,7 +64,7 @@
             </div>
             
             <div class="alert">
-                Create your AFM file by filling in the metadata form and writing your agent's content in markdown format.
+                Create your Agent Flavored Markdown file by filling in the metadata form and writing your agent's content in markdown format.
                 <a href="http://localhost:8080/specification/" target="_blank">View the AFM Specification</a> for more guidance.
             </div>
             
@@ -118,9 +118,9 @@ Describe your agent's role here...
                         <!-- Basic Information Section -->
                         <div class="metadata-section" id="metadata-basic">
                             <div class="form-group">
-                                <label for="agent-identifier">Agent Identifier</label>
-                                <input type="text" class="form-control" id="agent-identifier" placeholder="e.g. math-tutor">
-                                <small>Used as the filename when saving. Lowercase with hyphens.</small>
+                                <label for="agent-identifier">Agent Identifier <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="agent-identifier" placeholder="e.g. math-tutor" required>
+                                <small>Required. Used as the filename when saving. Lowercase with hyphens.</small>
                             </div>
                             
                             <div class="form-group">
@@ -217,9 +217,9 @@ Describe your agent's role here...
             <div class="afm-identifier-modal-content">
                 <h4>Save AFM File</h4>
                 <div class="mb-3">
-                    <label for="modal-agent-identifier" class="form-label">Agent Identifier</label>
-                    <input type="text" class="form-control" id="modal-agent-identifier" placeholder="e.g. math-tutor">
-                    <small class="form-text text-muted">This will be used as the filename: [identifier].afm.md</small>
+                    <label for="modal-agent-identifier" class="form-label">Agent Identifier <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="modal-agent-identifier" placeholder="e.g. math-tutor" required>
+                    <small class="form-text text-muted">Required. This will be used as the filename: [identifier].afm.md</small>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Preview</label>

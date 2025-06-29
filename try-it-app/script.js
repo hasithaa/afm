@@ -502,8 +502,23 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSavedAfms(); // Refresh the list immediately
     }
 
+    // Function to validate the form before saving
+    function validateForm() {
+        // Check if identifier is provided
+        if (!identifierField.value.trim()) {
+            alert('Agent Identifier is required.');
+            identifierField.focus();
+            return false;
+        }
+        return true;
+    }
+    
     // Save AFM to local storage
     function saveToLocalStorage() {
+        // Validate form first
+        if (!validateForm()) {
+            return; // Stop if validation fails
+        }
         showAfmIdentifierModal();
     }
     
@@ -535,7 +550,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save the AFM to local storage with the specified identifier
     function saveAfmToStorage(identifier) {
         if (!identifier) {
-            alert('Please provide an agent identifier');
+            alert('Please provide an Agent Identifier');
+            modalAgentIdentifier.focus();
             return;
         }
         
@@ -544,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check if identifier exists and confirm overwrite if needed
         if (localStorage.getItem(AFM_STORAGE_PREFIX + cleanIdentifier) && cleanIdentifier !== currentAfmId) {
-            if (!confirm(`An AFM with identifier "${cleanIdentifier}" already exists. Do you want to overwrite it?`)) {
+            if (!confirm(`An Agent Flavored Markdown file with identifier "${cleanIdentifier}" already exists. Do you want to overwrite it?`)) {
                 return; // User cancelled the overwrite
             }
         }
@@ -694,6 +710,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(function() {
                     easyMDE.codemirror.refresh();
                 }, 100);
+            }
+            
+            // Set focus to the identifier field if it's empty
+            if (!identifierField.value && !identifierField.readOnly) {
+                identifierField.focus();
             }
         }, 200);
     }
@@ -893,7 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (createNewBtn) {
         debugLog('Adding event listener to createNewBtn');
         createNewBtn.addEventListener('click', function(e) {
-            debugLog('Create New AFM button clicked');
+            debugLog('Create New Agent Flavored Markdown button clicked');
             try {
                 // Reset current AFM
                 currentAfmId = null;

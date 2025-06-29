@@ -7,13 +7,13 @@ hide:
 
 ## 1. Introduction
 
-AFM provides a structured, markdown-based format for defining the capabilities, behaviors, and knowledge of AI agents. The goal is to create a universal standard that allows agents to be easily defined, shared, and deployed.
+AFM (Agent Flavored Markdown) provides a structured, markdown-based format for defining the capabilities, behaviors, and knowledge of AI agents. The goal is to create a universal standard that allows agents to be easily defined, shared, and deployed.
 
 AFM is designed to be composable. It supports not only the definition of individual agents but also complex, multi-agent systems where agents can collaborate and delegate tasks to one another.
 
 This document details the AFM file format, its syntax, and the schema for defining an agent. For a more detailed implementation guide, refer to the [AFM Implementation Guide](#).
 
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)] when, and only when, they appear in all capitals, as shown here.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)] when, and only when, they appear in all capitals, as shown here.
 
 
 
@@ -42,7 +42,7 @@ AFM is built around a few core concepts that define how agents are structured an
 An agent definition file must use the `*.afm.md` or `.afm` extension. The filename without the extension part serves as the agent's unique artifact ID within its namespace. 
 The file name should not start with special characters, numbers, or whitespace. 
 
-The file name **SHOULD** be unique within the namespace to avoid conflicts.
+The file name **MUST** be unique within the namespace to avoid conflicts.
 
 The file content must be encoded in UTF-8. 
 
@@ -66,7 +66,7 @@ An AFM file is structured into two main sections: the front matter and the agent
 
 The front matter is a YAML block at the top of the file, enclosed by `---` lines. Refer to the [YAML specification](https://yaml.org/spec/1.2/spec.html) for more details on YAML syntax.
 
-This section contains metadata about the agent. These metadata fields are **OPTIONAL** and can be used to provide additional context or configuration for the agent.
+This section contains metadata about the agent. These metadata fields are **OPTIONAL** except for the agent identifier which is **REQUIRED** and can be used to provide additional context or configuration for the agent.
 
 | Section             | Description                                                                                   |
 |---------------------|-----------------------------------------------------------------------------------------------|
@@ -131,7 +131,7 @@ This section defines the schema for the Front Matter. For clarity, the schema is
 
 ### 5.1. About the Agent 
 
-This section defines the schema for agent-specific metadata. It is **OPTIONAL** but recommended for clarity and organization. AFM implementations **SHALL** use this section to display the agent's metadata in user interfaces to provide better user experience for end users.
+This section defines the schema for agent-specific metadata. It is **OPTIONAL** but recommended for clarity and organization, except for the agent identifier which is **REQUIRED**. AFM implementations **SHALL** use this section to display the agent's metadata in user interfaces to provide better user experience for end users.
 
 #### 5.1.1. Schema Overview
 
