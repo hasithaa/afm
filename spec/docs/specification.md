@@ -153,21 +153,28 @@ iconUrl: string        # URL to an icon representing the agent
 license: string        # License under which the agent is released
 ```
 
-#### 5.1.2. Field Definitions
+#### 5.1.2. Field Definitions {#agent-field-definitions}
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `name` | `string` | No | filename | Name of the agent. If not provided, inferred from the filename. |
-| `description` | `string` | No | from Role section | Brief description of the agent's purpose. If not provided, inferred from the `# Role` section. |
-| `version` | `string` | No | "0.0.0" | [Semantic version](https://semver.org/) of the agent definition. |
-| `namespace` | `string` | No | "default" | Logical grouping category for the agent. |
-| `author` | `string` | No | - | Single author in format "Name <Email>". |
-| `authors` | `string[]` | No | - | Multiple authors, each in format "Name <Email>". Takes precedence over `author` if both exist. |
-| `iconUrl` | `string` | No | - | URL to an icon representing the agent. |
-| `provider` | `object` | No | - | Information about the agent provider. |
-| `provider.organization` | `string` | No | - | Name of the organization providing the agent. |
-| `provider.url` | `string` | No | - | URL to the organization's website. |
-| `license` | `string` | No | - | License under which the agent definition is released. |
+Each field serves a specific purpose in defining and organizing the agent:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| [`name`](#field-name) | `string` | No | Identifies the agent in human-readable form.<br>Default: inferred from the filename of the AFM file.<br>AFM implementations **SHALL** use this field to display the agent's name in user interfaces. |
+| [`description`](#field-description) | `string` | No | Provides a concise summary of what the agent does.<br>Default: inferred from the markdown body `# Role` section.<br>AFM implementations **SHALL** use this field to display the agent's description in user interfaces. |
+| [`version`](#field-version) | `string` | No | [Semantic version](https://semver.org/) of the agent definition (MAJOR.MINOR.PATCH).<br>Default: "0.0.0".<br>AFM implementations **SHALL** use this field to display the agent's version in user interfaces. |
+| [`namespace`](#field-namespace) | `string` | No | Logical grouping category for the agent.<br>Default: "default".<br>AFM implementations **SHALL** use this field to organize agents into logical groups or categories. |
+| [`author`](#field-author) | `string` | No | Single author in format "Name <Email>".<br>Credits the creator of the agent definition. If both `author` and `authors` fields are provided, `authors` takes precedence. |
+| [`authors`](#field-authors) | `string[]` | No | Multiple authors, each in format "Name <Email>".<br>Credits the creators of the agent definition. Takes precedence over `author` if both exist. |
+| [`iconUrl`](#field-iconurl) | `string` | No | URL to an icon representing the agent.<br>This is **OPTIONAL** but recommended for visual representation in user interfaces.<br>AFM implementations **SHALL** use this field to display the agent's icon in user interfaces. |
+| [`provider`](#field-provider) | `object` | No | Information about the organization providing the agent.<br>This is **OPTIONAL** but recommended for attribution.<br>See the [Provider Object](#provider-object) below for details. |
+| [`license`](#field-license) | `string` | No | License under which the agent definition is released.<br>This is **OPTIONAL** but recommended for clarity. |
+
+**<a id="provider-object"></a>Provider Object:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| [`provider.organization`](#field-provider-organization) | `string` | No | Name of the organization providing the agent. |
+| [`provider.url`](#field-provider-url) | `string` | No | URL to the organization's website. |
 
 #### 5.1.3. Example Usage
 
@@ -190,31 +197,134 @@ license: "MIT"
 ---
 ```
 
-#### 5.1.4. Field Details
+### 5.2 Connections
 
-Each field serves a specific purpose in defining and organizing the agent:
+This section defines the schema for agent connections to external services and tools. It is **OPTIONAL** but enables agents to interact with external systems and resources.
 
-##### Name
-The `name` field identifies the agent in human-readable form. AFM implementations **SHALL** use this field to display the agent's name in user interfaces. If not provided, the agent's name can be inferred from the filename of the AFM file.
+#### 5.2.1. Schema Overview
 
-##### Description
-The `description` field provides a concise summary of what the agent does. AFM implementations **SHALL** use this field to display the agent's description in user interfaces. If not provided, the agent's description can be inferred from the markdown body `# Role` section.
+The connections fields are specified in the YAML frontmatter of an AFM file:
 
-##### Version
-The `version` field follows [Semantic Versioning](https://semver.org/) conventions (MAJOR.MINOR.PATCH). AFM implementations **SHALL** use this field to display the agent's version in user interfaces. If not provided, the agent's version can be inferred as `0.0.0`.
+```yaml
+# Agent connections schema
+connections:
+  mcp: object         # Model Context Protocol configuration
+  a2a: object         # Agent-to-Agent Protocol configuration
+  # Additional protocol configurations may be added in the future
+```
 
-##### Namespace
-The `namespace` field enables logical grouping of related agents. AFM implementations **SHALL** use this field to organize agents into logical groups or categories. If not provided, the agent's namespace is defaulted to `default`.
+#### 5.2.2. Field Definitions
 
-##### Author/Authors
-The `author` field (single) or `authors` field (multiple) credits the creators of the agent definition. If the Author name and Email are provided, the `author` field **SHALL** be formatted as `Name <Email>`. When both fields are provided, `authors` takes precedence.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `connections` | `object` | No | Container for protocol-specific connection configurations. |
+| `connections.mcp` | `object` | No | Configuration for Model Context Protocol. See [Section 6.1](#61-model-context-protocol-mcp) for details. |
+| `connections.a2a` | `object` | No | Configuration for Agent-to-Agent Protocol. See [Section 6.2](#62-agent-to-agent-protocol-a2a) for details. |
 
-##### Icon URL
-The `iconUrl` field specifies a URL to an icon representing the agent. This is **OPTIONAL** but recommended for visual representation in user interfaces. AFM implementations **SHALL** use this field to display the agent's icon in user interfaces, if available.
+#### 5.2.3. Example Usage
 
-##### License
-The `license` field specifies the terms under which others can use, modify, or distribute the agent definition. It is **OPTIONAL** but recommended for clarity.
+Here's a simple example of connections in an AFM file:
 
-### 5.2 Agent Capabilities
+```yaml
+connections:
+  mcp:
+    servers:
+      - name: "github_api"
+        transport:
+          type: "http_sse"
+          url: "https://mcp.github.com/api"
+```
+
+### 5.3 Agent Capabilities
 
 This section defines the schema for agent capabilities - the tools, skills, or functions that the agent can perform.
+
+## 6. Protocol Extensions
+
+This section details the standard protocol extensions supported by the AFM specification. These protocols enable agents to communicate with external systems and other agents.
+
+### 6.1. Model Context Protocol (MCP)
+
+The Model Context Protocol (MCP) enables agents to connect to external tools and data sources.
+
+#### 6.1.1. Schema Overview
+
+```yaml
+mcp:
+  servers:
+    - name: string           # Unique identifier for the server connection
+      transport:
+        type: string         # Transport mechanism (http_sse, stdio, streamable_http)
+        url: string          # URL endpoint (for http_sse and streamable_http)
+        command: string      # Shell command (for stdio)
+      authentication:        # Optional
+        type: string         # Authentication scheme (oauth2, api_key, etc.)
+  tool_filter:               # Optional
+    allow: [string]          # Whitelist of tools in "server_name/tool_name" format
+    deny: [string]           # Blacklist of tools in "server_name/tool_name" format
+```
+
+#### 6.1.2. Field Definitions
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| [`servers`](#mcp-servers) | Array | Yes | Specifies the MCP servers that the agent can connect to. Each server entry must have a unique `name` that identifies the connection. |
+| [`tool_filter`](#mcp-tool-filter) | Object | No | Allows for fine-grained control over which tools from the connected servers are exposed to the agent. |
+
+**Server Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `name` | String | Yes | A unique, human-readable identifier for the connection. |
+| `transport` | Object | Yes | An object defining the communication mechanism. See [Transport Object](#mcp-transport) below. |
+| `authentication` | Object | No | An object declaring the required authentication scheme. See [Authentication Object](#mcp-authentication) below. |
+
+**<a id="mcp-transport"></a>Transport Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `type` | String | Yes | Transport mechanism, which must be one of:<br>- `http_sse`: Server-Sent Events over HTTP<br>- `stdio`: Standard input/output for local processes<br>- `streamable_http`: HTTP with streaming capabilities |
+| `url` | String | For HTTP types | The URL endpoint of the remote MCP server. |
+| `command` | String | For stdio | The shell command used to start the local MCP server process. |
+
+**<a id="mcp-authentication"></a>Authentication Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `type` | String | Yes | Authentication scheme (e.g., `oauth2`, `api_key`).<br>The agent's host environment is responsible for managing the actual credentials and authentication flow. |
+
+**<a id="mcp-tool-filter"></a>Tool Filter Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `allow` | String Array | No | A whitelist of tools to expose, in `server_name/tool_name` format. |
+| `deny` | String Array | No | A blacklist of tools to hide, in `server_name/tool_name` format. |
+
+#### 6.1.3. Example Implementation
+
+This example defines connections to a remote GitHub MCP server (requiring OAuth 2.0) and a local filesystem server. It then filters the available tools.
+
+```yaml
+connections:
+  mcp:
+    servers:
+      - name: github_mcp_server
+        transport:
+          type: http_sse
+          url: "https://mcp.github.com/api"
+        authentication:
+          type: oauth2
+
+      - name: local_filesystem_server
+        transport:
+          type: stdio
+          command: "npx -y @modelcontextprotocol/server-filesystem"
+
+    tool_filter:
+      allow:
+        - "github_mcp_server/create_issue"
+        - "github_mcp_server/list_repositories"
+        - "local_filesystem_server/read_file"
+      deny:
+        - "local_filesystem_server/write_file"
+```

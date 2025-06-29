@@ -111,6 +111,7 @@ Describe your agent's role here...
                     <div class="metadata-nav">
                         <div class="metadata-nav-link active" data-section="basic">Basic Information</div>
                         <div class="metadata-nav-link" data-section="authors">Authors & Provider</div>
+                        <div class="metadata-nav-link" data-section="connections">Connections</div>
                         <div class="metadata-nav-link" data-section="additional">Additional Details</div>
                     </div>
                     
@@ -177,6 +178,38 @@ Describe your agent's role here...
                             </div>
                         </div>
                         
+                        <!-- Connections Section - New -->
+                        <div class="metadata-section" id="metadata-connections" style="display:none;">
+                            <!-- MCP Connection Configuration -->
+                            <div class="form-group">
+                                <label>MCP Connections</label>
+                                <div id="mcp-servers-container">
+                                    <!-- MCP servers will be added here -->
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm mt-2" id="add-mcp-server-btn">Add MCP Server</button>
+                                <small>Model Context Protocol server connections for external tools.</small>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <label>Tool Filter</label>
+                                <div class="mb-2">
+                                    <label class="form-label">Allow</label>
+                                    <div id="mcp-tool-allow-container">
+                                        <!-- Tool allow entries will be added here -->
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm mt-1" id="add-tool-allow-btn">Add Allowed Tool</button>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Deny</label>
+                                    <div id="mcp-tool-deny-container">
+                                        <!-- Tool deny entries will be added here -->
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm mt-1" id="add-tool-deny-btn">Add Denied Tool</button>
+                                </div>
+                                <small>Control which tools from connected servers are accessible.</small>
+                            </div>
+                        </div>
+                        
                         <!-- Additional Details Section -->
                         <div class="metadata-section" id="metadata-additional" style="display:none;">
                             <div class="form-group">
@@ -184,6 +217,8 @@ Describe your agent's role here...
                                 <input type="text" class="form-control" id="agent-iconurl" placeholder="https://example.com/icon.png">
                                 <small>URL to an image that represents your agent.</small>
                             </div>
+                            
+                            <!-- Remove MCP Connection Configuration from here as it's moved to its own tab -->
                             
                             <!-- Other future metadata fields can be added here -->
                             <div class="text-muted p-3 text-center mt-4">
@@ -231,12 +266,75 @@ Describe your agent's role here...
                 </div>
             </div>
         </div>
+
+        <!-- MCP Server Template (hidden) -->
+        <template id="mcp-server-template">
+            <div class="mcp-server-entry card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">MCP Server</h6>
+                    <button class="btn btn-sm btn-outline-danger remove-mcp-server-btn">Remove</button>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Server Name</label>
+                        <input type="text" class="form-control mcp-server-name" placeholder="e.g. github_api">
+                    </div>
+                    <div class="form-group">
+                        <label>Transport Type</label>
+                        <select class="form-control mcp-transport-type">
+                            <option value="http_sse">http_sse</option>
+                            <option value="stdio">stdio</option>
+                            <option value="streamable_http">streamable_http</option>
+                        </select>
+                    </div>
+                    <div class="form-group mcp-url-field">
+                        <label>URL</label>
+                        <input type="text" class="form-control mcp-server-url" placeholder="https://mcp.example.com/api">
+                    </div>
+                    <div class="form-group mcp-command-field" style="display:none;">
+                        <label>Command</label>
+                        <input type="text" class="form-control mcp-server-command" placeholder="npx -y @modelcontextprotocol/server-example">
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input mcp-auth-toggle" type="checkbox" id="mcp-auth-toggle">
+                        <label class="form-check-label" for="mcp-auth-toggle">Add Authentication</label>
+                    </div>
+                    <div class="mcp-auth-section" style="display:none;">
+                        <div class="form-group">
+                            <label>Authentication Type</label>
+                            <select class="form-control mcp-auth-type">
+                                <option value="oauth2">oauth2</option>
+                                <option value="api_key">api_key</option>
+                                <option value="basic">basic</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Tool Filter Entry Template (hidden) -->
+        <template id="tool-filter-entry-template">
+            <div class="tool-filter-entry input-group mb-2">
+                <input type="text" class="form-control tool-filter-value" placeholder="server_name/tool_name">
+                <button class="btn btn-outline-danger remove-tool-filter-btn">×</button>
+            </div>
+        </template>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml/dist/js-yaml.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-    <script src="script.js"></script>
+    
+    <!-- Modularized JavaScript -->
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/metadata.js"></script>
+    <script src="js/mcp.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
