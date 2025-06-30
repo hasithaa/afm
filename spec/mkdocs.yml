@@ -34,12 +34,20 @@ theme:
   features:
     - navigation.tabs
     - navigation.top
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.tracking
+    - toc.follow
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.annotate
     - content.code.copy
+    - content.tabs.link
     - content.cards
     - header.autohide
+    - announce.dismiss
 
 # Extensions
 markdown_extensions:
@@ -56,20 +64,52 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - pymdownx.tabbed:
       alternate_style: true
+  - footnotes
+  - tables
+  - def_list
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
 
 # Extra CSS for custom styling
 extra_css:
   - stylesheets/extra.css
 
-# extra:
-#   version:
-#     provider: mike
-#     default: stable
+# Extra JavaScript files
+extra_javascript:
+  - javascripts/extra.js
+
+# Add extra configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hasithaa/afm
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+  version:
+    provider: mike
+    default: latest
 
 # Navigation structure
 nav:
   - Home: index.md
   - Specification: specification.md
+  - Topics:
+      - Introduction: topics/index.md
+      - Why AFM?: topics/why-afm.md
+      - Connected Agents: topics/afm-connected-agent.md
   - 'Try It!': /try-it/

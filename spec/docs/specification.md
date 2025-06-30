@@ -328,3 +328,55 @@ connections:
       deny:
         - "local_filesystem_server/write_file"
 ```
+
+### 6.2. Agent-to-Agent Protocol (A2A)
+
+The Agent-to-Agent Protocol (A2A) enables agents to collaborate with other agents, forming a multi-agent system where tasks can be delegated and information can be shared.
+
+#### 6.2.1. Schema Overview
+
+```yaml
+a2a:
+  exposes_service: boolean   # Whether this agent exposes a discoverable service
+  endpoint: string           # Path or URL endpoint where the agent service is available
+  discoverable: boolean      # Whether the agent should be discoverable by other agents
+  agent_card:                # Optional metadata for agent discovery
+    name: string             # Display name for the agent in service directories
+    description: string      # Brief description of the agent's service capabilities
+    icon: string             # URL to an icon representing the agent service
+```
+
+#### 6.2.2. Field Definitions
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `exposes_service` | Boolean | No | Specifies whether the agent should expose a callable service endpoint that other agents can discover and use. Default: `false`. |
+| `endpoint` | String | When `exposes_service` is true | The path or URL where the agent service is available for other agents to call. |
+| `discoverable` | Boolean | No | Controls whether the agent is listed in service directories for other agents to find. Default: `true` when `exposes_service` is true. |
+| `agent_card` | Object | No | Contains metadata used when the agent is listed in service directories. See [Agent Card Object](#a2a-agent-card) below. |
+
+**<a id="a2a-agent-card"></a>Agent Card Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `name` | String | No | Display name for the agent in service directories. Default: Uses the agent's name from its metadata. |
+| `description` | String | No | Brief description of what services the agent provides. Default: Uses the agent's description from its metadata. |
+| `icon` | String | No | URL to an icon representing the agent service. Default: Uses the agent's iconUrl from its metadata. |
+
+#### 6.2.3. Example Implementation
+
+This example defines an agent that exposes itself as a collaborative service that other agents can discover and call.
+
+```yaml
+connections:
+  a2a:
+    exposes_service: true
+    endpoint: "/expert-research-assistant"
+    discoverable: true
+    agent_card:
+      name: "Research Assistant"
+      description: "Expert in finding, analyzing, and summarizing research papers"
+      icon: "https://example.com/icons/research-assistant.png"
+```
+
+In this example, the agent is configured to be callable by other agents through the specified endpoint. The agent card provides information that will be displayed when other agents search for available services.

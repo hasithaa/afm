@@ -1,0 +1,142 @@
+/* Custom styling for AFM docs */
+
+/* Enhance card appearance */
+.md-typeset .grid.cards > :is(ul, ol) > li,
+.md-typeset .grid > .card {
+  border-radius: 0.5rem;
+  box-shadow: var(--md-shadow-z2);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.md-typeset .grid.cards > :is(ul, ol) > li:hover,
+.md-typeset .grid > .card:hover {
+  transform: translateY(-0.2rem);
+  box-shadow: var(--md-shadow-z3);
+}
+
+/* Custom callout boxes */
+.md-typeset .callout {
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-left: 0.25rem solid var(--md-primary-fg-color);
+  background-color: var(--md-code-bg-color);
+  border-radius: 0.2rem;
+}
+
+.md-typeset .callout.warning {
+  border-left-color: var(--md-accent-fg-color);
+}
+
+/* Feature list items */
+.feature-list li {
+  margin-bottom: 0.8rem;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: "✓";
+  color: var(--md-primary-fg-color);
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Code block enhancements */
+.md-typeset pre > code {
+  border-radius: 0.5rem;
+}
+
+/* Enhanced buttons */
+.md-button {
+  transition: transform 0.15s, opacity 0.15s;
+  border-radius: 0.4rem !important;
+  font-weight: 600 !important;
+}
+
+.md-button:hover {
+  transform: translateY(-0.1rem);
+  opacity: 0.9;
+}
+
+.md-button--primary {
+  background-color: var(--md-primary-fg-color) !important;
+}
+
+/* Hero section styling */
+.hero {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  max-width: 40rem;
+  margin: 1rem auto;
+  opacity: 0.87;
+}
+
+/* Timeline styling */
+.timeline {
+  position: relative;
+  padding: 1rem 0;
+  margin: 2rem 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background-color: var(--md-primary-fg-color);
+}
+
+.timeline-item {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: var(--md-primary-fg-color);
+}
+
+/* Table enhancements */
+.md-typeset table:not([class]) {
+  border-radius: 0.5rem;
+  box-shadow: var(--md-shadow-z1);
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > :is(ul, ol) > li,
+[data-md-color-scheme="slate"] .md-typeset .grid > .card {
+  background-color: var(--md-code-bg-color);
+}
+
+/* Animation for some elements */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
