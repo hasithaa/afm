@@ -2,16 +2,81 @@
 function debugLog(message) {
     console.log(message);
     const debugDiv = document.getElementById('debug');
-    if (debugDiv) {
-        debugDiv.style.display = 'block';
-        debugDiv.innerHTML += message + '<br>';
-        // Limit to last 5 messages
-        const lines = debugDiv.innerHTML.split('<br>');
-        if (lines.length > 6) {
-            debugDiv.innerHTML = lines.slice(-6).join('<br>');
+    const debugContent = document.getElementById('debug-content');
+    
+    if (debugDiv && debugContent) {
+        // Create log entry with timestamp
+        const entry = document.createElement('div');
+        entry.className = 'debug-log-entry';
+        
+        const timestamp = document.createElement('span');
+        timestamp.className = 'debug-timestamp';
+        timestamp.textContent = new Date().toLocaleTimeString();
+        
+        const msg = document.createElement('span');
+        msg.className = 'debug-message';
+        msg.textContent = message;
+        
+        entry.appendChild(timestamp);
+        entry.appendChild(msg);
+        debugContent.appendChild(entry);
+        
+        // Limit to last 30 messages
+        const entries = debugContent.querySelectorAll('.debug-log-entry');
+        if (entries.length > 30) {
+            debugContent.removeChild(entries[0]);
         }
+        
+        // Scroll to bottom
+        debugContent.scrollTop = debugContent.scrollHeight;
     }
 }
+
+// Setup debug toggle and close button
+document.addEventListener('DOMContentLoaded', function() {
+    const debugToggle = document.getElementById('debug-toggle');
+    const debugDiv = document.getElementById('debug');
+    const debugCloseBtn = document.getElementById('debug-close');
+    
+    // Functions to show/hide debug window
+    function showDebugWindow() {
+        if (debugDiv) {
+            debugDiv.style.display = 'block';
+            // Scroll to bottom when showing
+            const debugContent = document.getElementById('debug-content');
+            if (debugContent) {
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+        }
+    }
+    
+    function hideDebugWindow() {
+        if (debugDiv) {
+            debugDiv.style.display = 'none';
+        }
+    }
+    
+    // Set up toggle functionality
+    if (debugToggle) {
+        debugToggle.addEventListener('click', function() {
+            if (debugDiv && debugDiv.style.display === 'block') {
+                hideDebugWindow();
+            } else {
+                showDebugWindow();
+            }
+        });
+    }
+    
+    // Set up close button
+    if (debugCloseBtn) {
+        debugCloseBtn.addEventListener('click', function() {
+            hideDebugWindow();
+        });
+    }
+    
+    // Initialize with welcome message
+    debugLog('Debug console initialized');
+});
 
 // Global error handler
 window.onerror = function(message, source, lineno, colno, error) {

@@ -19,7 +19,8 @@ The repository is organized into several key directories:
 ├── reference-implementations/ \# Reference implementations (e.g., Ballerina, python, Go, etc.)
 ├── misc/                 \# Miscellaneous support services (e.g., MCP servers)
 ├── docker-compose.yml    \# Defines how all services run together
-└── build.sh              \# The development environment startup script
+└── start.sh              \# The development environment start script
+└── stop.sh               \# The development environment stop script
 
 ````
 
@@ -43,12 +44,12 @@ Get the local development environment up and running in just a few steps.
 2.  **Make the Script Executable:**
     (You only need to do this once)
     ```sh
-    chmod +x build.sh
+    chmod +x start.sh
     ```
 
 3.  **Run the Development Server:**
     ```sh
-    ./build.sh
+    ./start.sh
     ```
 
 This script will build the necessary Docker images and start all the services. Once it's finished, you can access the site:
@@ -63,5 +64,5 @@ The development server features **live reloading**. Any changes you make to the 
 To stop all running services, use the following command:
 
 ```sh
-docker-compose down
-````
+./stop.sh
+```

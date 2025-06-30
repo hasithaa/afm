@@ -107,3 +107,50 @@ function setupModal(modal, cancelBtn, confirmBtn, clickOutsideCloses = true) {
         });
     }
 }
+
+// Setup tabs without requiring Bootstrap JS
+function setupTabs() {
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    if (!tabButtons || tabButtons.length === 0) return;
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the target tab
+            const target = this.getAttribute('data-bs-target');
+            if (!target) return;
+            
+            const targetElement = document.querySelector(target);
+            if (!targetElement) return;
+
+            // Get the parent tab list and content
+            const tabList = this.closest('.nav-tabs');
+            const tabContent = document.getElementById(tabList.getAttribute('aria-controls')) || 
+                              targetElement.parentElement;
+            
+            if (!tabList || !tabContent) return;
+
+            // Deactivate all tabs in this list
+            tabList.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.classList.remove('active');
+                tab.setAttribute('aria-selected', 'false');
+            });
+
+            // Hide all tab panes in this content area
+            tabContent.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+            });
+
+            // Activate this tab
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+
+            // Show the target tab pane
+            targetElement.classList.add('active', 'show');
+            
+            // If this tab contains saved AFMs, refresh the list
+            if (target === '#saved-content') {
+                window.loadSavedAfms && window.loadSavedAfms();
+            }
+        });
+    });
+}

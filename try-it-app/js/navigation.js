@@ -3,34 +3,82 @@
 // Navigation functions
 function showHomePage(homePage, editorPage, previewPage, loadSavedAfmsCallback) {
     debugLog('Showing home page');
-    if (loadSavedAfmsCallback) loadSavedAfmsCallback(); // Refresh the saved AFM list
+    // Check if elements exist before trying to modify them
+    if (!homePage) {
+        console.error('Home page element not found');
+        return;
+    }
+    
     homePage.style.display = 'block';
-    editorPage.style.display = 'none';
-    previewPage.style.display = 'none';
+    
+    if (editorPage) {
+        editorPage.style.display = 'none';
+    }
+    
+    if (previewPage) {
+        previewPage.style.display = 'none';
+    }
+    
+    // Only call the callback if it exists
+    if (typeof loadSavedAfmsCallback === 'function') {
+        loadSavedAfmsCallback(); // Refresh the saved AFM list
+    }
 }
 
 function showEditorPage(homePage, editorPage, previewPage) {
     debugLog('Showing editor page');
-    homePage.style.display = 'none';
+    // Check if elements exist before trying to modify them
+    if (!editorPage) {
+        console.error('Editor page element not found');
+        return;
+    }
+    
+    if (homePage) {
+        homePage.style.display = 'none';
+    }
+    
     editorPage.style.display = 'block';
-    previewPage.style.display = 'none';
+    
+    if (previewPage) {
+        previewPage.style.display = 'none';
+    }
     
     // Initialize editor if not already done
     setTimeout(function() {
-        initEditor();
-        // Refresh the editor after a delay
-        if (easyMDE && editorInitialized) {
-            setTimeout(function() {
-                easyMDE.codemirror.refresh();
-            }, 100);
+        if (typeof initEditor === 'function') {
+            initEditor();
+            // Refresh the editor after a delay
+            if (typeof easyMDE !== 'undefined' && typeof editorInitialized !== 'undefined' && editorInitialized) {
+                setTimeout(function() {
+                    easyMDE.codemirror.refresh();
+                }, 100);
+            }
+        }
+        
+        // Set focus to the identifier field if it's empty
+        const identifierField = document.getElementById('agent-identifier');
+        if (identifierField && !identifierField.value && !identifierField.readOnly) {
+            identifierField.focus();
         }
     }, 200);
 }
 
 function showPreviewPage(homePage, editorPage, previewPage) {
     debugLog('Showing preview page');
-    homePage.style.display = 'none';
-    editorPage.style.display = 'none';
+    // Check if elements exist before trying to modify them
+    if (!previewPage) {
+        console.error('Preview page element not found');
+        return;
+    }
+    
+    if (homePage) {
+        homePage.style.display = 'none';
+    }
+    
+    if (editorPage) {
+        editorPage.style.display = 'none';
+    }
+    
     previewPage.style.display = 'block';
 }
 
@@ -140,7 +188,12 @@ function setupNavigation(
 
 // Render saved AFMs list
 function renderSavedAfms(savedAfmsList, noSavedAfms, openCallback, cloneCallback, deleteCallback) {
-    const savedAfms = getSavedAfmsList();
+    if (!savedAfmsList || !noSavedAfms) {
+        console.error('Saved AFMs list elements not found');
+        return;
+    }
+
+    const savedAfms = typeof getSavedAfmsList === 'function' ? getSavedAfmsList() : [];
     
     if (savedAfms.length === 0) {
         noSavedAfms.style.display = 'block';
@@ -155,10 +208,10 @@ function renderSavedAfms(savedAfmsList, noSavedAfms, openCallback, cloneCallback
         const item = document.createElement('div');
         item.className = 'saved-afm-item';
         
-        const metadata = loadAfmFromStorage(identifier);
+        const metadata = typeof loadAfmFromStorage === 'function' ? loadAfmFromStorage(identifier) : null;
         const title = document.createElement('div');
         title.className = 'saved-afm-title';
-        title.textContent = metadata.name || identifier;
+        title.textContent = metadata && metadata.name ? metadata.name : identifier;
         
         const actions = document.createElement('div');
         actions.className = 'saved-afm-actions';
@@ -167,22 +220,28 @@ function renderSavedAfms(savedAfmsList, noSavedAfms, openCallback, cloneCallback
         openBtn.className = 'btn btn-sm btn-outline-primary';
         openBtn.textContent = 'Open';
         openBtn.addEventListener('click', () => {
-            openCallback(identifier);
+            if (typeof openCallback === 'function') {
+                openCallback(identifier);
+            }
         });
         
         const cloneBtn = document.createElement('button');
         cloneBtn.className = 'btn btn-sm btn-outline-secondary';
         cloneBtn.textContent = 'Clone';
         cloneBtn.addEventListener('click', () => {
-            cloneCallback(identifier);
+            if (typeof cloneCallback === 'function') {
+                cloneCallback(identifier);
+            }
         });
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-sm btn-outline-danger';
         deleteBtn.textContent = 'Delete';
         deleteBtn.addEventListener('click', () => {
-            if (confirm(`Are you sure you want to delete "${metadata.name || identifier}"?`)) {
-                deleteCallback(identifier);
+            if (confirm(`Are you sure you want to delete "${metadata && metadata.name ? metadata.name : identifier}"?`)) {
+                if (typeof deleteCallback === 'function') {
+                    deleteCallback(identifier);
+                }
             }
         });
         

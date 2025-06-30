@@ -5,45 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AFM Try-it</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="debug" class="debug-info" style="display: none;"></div>
+    <!-- Debug elements - updated with close button -->
+    <div id="debug" class="debug-info">
+        <div class="debug-header">
+            <span>Debug Console</span>
+            <button id="debug-close" class="debug-close-btn"><i class="bi bi-x"></i></button>
+        </div>
+        <div id="debug-content" class="debug-content"></div>
+    </div>
+    <div id="debug-toggle" class="debug-toggle">
+        <i class="bi bi-bug"></i>
+    </div>
 
     <div class="container-fluid">
-        <!-- Top Navigation -->
-        <div class="top-nav">
-            <h2>AFM Try-it</h2>
-            <div>
-                <a href="http://localhost:8080/specification/" class="btn btn-outline-primary me-2">Read Spec</a>
-                <a href="http://localhost:8080/" class="btn btn-outline-secondary">Home</a>
+        <!-- Top Navigation - Updated to match main website -->
+        <div class="header-nav">
+            <div class="header-title">
+                <span class="logo">
+                    <!-- You can add a logo image here if needed -->
+                    <img src="favicon.ico" alt="logo" class="logo-img">
+                </span>
+                <h1>AFM - Agent Flavored Markdown</h1>
+            </div>
+            <div class="header-links">
+                <a href="http://localhost:8080/" class="header-link">Home</a>
+                <a href="http://localhost:8080/specification/" class="header-link">Specification</a>
+                <a href="#" class="header-link active">Try It!</a>
+                <a href="http://localhost:8080/hasithaa/afm" class="header-link">GitHub</a>
             </div>
         </div>
 
         <!-- Home Page -->
         <div class="home-container" id="home-page">
-            <p class="lead mb-4">Create, edit, and run AFM (Agent Flavored Markdown) files</p>
-            <div class="d-grid gap-3 col-6 mx-auto">
-                <button id="create-new-btn" class="btn btn-primary btn-lg">Create New AFM</button>
-                <button id="run-afm-btn" class="btn btn-secondary btn-lg disabled-button" disabled title="Feature coming soon">Run AFM (Coming Soon)</button>
-                
-                <!-- File Upload Option -->
-                <div class="file-upload-container">
-                    <h4>Upload AFM File</h4>
-                    <div class="file-upload-area" id="file-upload-area">
-                        <p>Click here or drag and drop AFM file</p>
-                        <input type="file" id="file-upload-input" accept=".md,.afm.md,.afm" style="display: none;">
+            <h1 class="text-center mb-4">Agent Flavored Markdown</h1>
+            <p class="lead mb-4 text-center">Create, deploy, and interact with AI agents using the AFM standard</p>
+            
+            <!-- Workflow Steps -->
+            <div class="workflow-steps mb-5">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="workflow-step active">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Create</h3>
+                                <p>Write and edit agent definitions using the AFM format</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="workflow-step disabled">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Deploy <span class="badge text-bg-secondary">Coming Soon</span></h3>
+                                <p>Deploy your agents to AI platforms and services</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="workflow-step disabled">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Interact <span class="badge text-bg-secondary">Coming Soon</span></h3>
+                                <p>Interact with your agents through various interfaces</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Saved AFMs Section -->
-            <div class="saved-afms" id="saved-afms-section">
-                <h3>Saved AFM Files</h3>
-                <div id="saved-afms-list">
-                    <!-- Saved AFM items will be loaded here dynamically -->
-                    <p class="text-muted" id="no-saved-afms">No saved AFM files found</p>
+            <!-- Create Agent Options - Updated with better grouping -->
+            <div class="create-options">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h2 class="section-title">Create</h2>
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">New Agent</h3>
+                                <p class="card-text">Create a new agent definition from scratch</p>
+                                <button id="create-new-btn" class="btn btn-primary btn-lg">Create New AFM</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h2 class="section-title">Open</h2>
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <ul class="nav nav-tabs mb-3" id="openTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-content" type="button" role="tab" aria-controls="upload-content" aria-selected="true">Upload</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="saved-tab" data-bs-toggle="tab" data-bs-target="#saved-content" type="button" role="tab" aria-controls="saved-content" aria-selected="false">Saved Agents</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content p-3" id="openTabsContent">
+                                    <div class="tab-pane fade show active" id="upload-content" role="tabpanel" aria-labelledby="upload-tab">
+                                        <h4 class="text-center">Upload AFM</h4>
+                                        <p class="text-center">Upload an existing AFM file to edit</p>
+                                        <div class="file-upload-area" id="file-upload-area">
+                                            <p>Click here or drag and drop AFM file</p>
+                                            <input type="file" id="file-upload-input" accept=".md,.afm.md,.afm" style="display: none;">
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="saved-content" role="tabpanel" aria-labelledby="saved-tab">
+                                        <h4 class="text-center">Saved Agents</h4>
+                                        <div id="saved-afms-list" class="saved-afms-list">
+                                            <!-- Saved AFM items will be loaded here dynamically -->
+                                        </div>
+                                        <p class="text-muted text-center" id="no-saved-afms">No saved AFM files found</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -323,6 +402,7 @@ Describe your agent's role here...
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml/dist/js-yaml.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>

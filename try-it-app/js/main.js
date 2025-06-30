@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const editorPage = document.getElementById('editor-page');
     const previewPage = document.getElementById('preview-page');
     const afmIdentifierModal = document.getElementById('afm-identifier-modal');
+    
+    // Tab elements
+    const uploadTab = document.getElementById('upload-tab');
+    const savedTab = document.getElementById('saved-tab');
+    const uploadContent = document.getElementById('upload-content');
+    const savedContent = document.getElementById('saved-content');
 
     // Home page elements
     const createNewBtn = document.getElementById('create-new-btn');
@@ -464,7 +470,47 @@ document.addEventListener('DOMContentLoaded', function() {
         resetForm
     );
     
-    // Initial load
-    loadSavedAfms();
-    showHomePage(homePage, editorPage, previewPage, loadSavedAfms);
+    // Setup tabs manually if Bootstrap JS is not working
+    if (uploadTab && savedTab) {
+        uploadTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            uploadTab.classList.add('active');
+            uploadTab.setAttribute('aria-selected', 'true');
+            savedTab.classList.remove('active');
+            savedTab.setAttribute('aria-selected', 'false');
+            
+            if (uploadContent) {
+                uploadContent.classList.add('active', 'show');
+            }
+            if (savedContent) {
+                savedContent.classList.remove('active', 'show');
+            }
+        });
+        
+        savedTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            savedTab.classList.add('active');
+            savedTab.setAttribute('aria-selected', 'true');
+            uploadTab.classList.remove('active');
+            uploadTab.setAttribute('aria-selected', 'false');
+            
+            if (savedContent) {
+                savedContent.classList.add('active', 'show');
+            }
+            if (uploadContent) {
+                uploadContent.classList.remove('active', 'show');
+            }
+            
+            // Refresh saved AFMs list when tab is clicked
+            loadSavedAfms();
+        });
+    }
+    
+    // Initial load - Make sure we have DOM elements before proceeding
+    if (homePage && savedAfmsList) {
+        loadSavedAfms();
+        showHomePage(homePage, editorPage, previewPage, loadSavedAfms);
+    } else {
+        console.error('Required DOM elements not found');
+    }
 });
