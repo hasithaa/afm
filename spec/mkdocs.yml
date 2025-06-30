@@ -112,4 +112,8 @@ nav:
       - Introduction: topics/index.md
       - Why AFM?: topics/why-afm.md
       - Connected Agents: topics/afm-connected-agent.md
+      - Rich Editor Experience: topics/rich-editor-experience.md
   - 'Try It!': /try-it/
+
+# Include images in documentation
+docs_dir: docs
