@@ -71,8 +71,9 @@ This section contains metadata about the agent. These metadata fields are **OPTI
 | Section             | Description                                                                                   |
 |---------------------|-----------------------------------------------------------------------------------------------|
 | Agent Metadata      | Information about the agent, such as its name, description, version, and author.              |
-| Agent Interface     | Defines how the agent interacts with other agents or systems, including input and output formats. |
+| Agent Interface     | Defines how the agent is invoked and its input/output signature.                             |
 | Agent Capabilities  | A list of capabilities (tools, skills, or functions) that the agent can perform.              |
+| Connections         | Defines outbound connections to external tools and peer agents.                              |
 
 Refer to the [AFM Schema](#5-schema-definitions) for a complete list of fields and their meanings.
 
@@ -105,6 +106,26 @@ The Markdown body **SHOULD** contain the following headings, with corresponding 
     authors:
       - "Jane Smith <jane@example.com>"
     license: "MIT"
+    
+    interface:
+      type: function
+      signature:
+        input:
+          - name: user_prompt
+            type: string
+            description: "The student's math question or problem"
+            required: true
+          - name: difficulty_level
+            type: string
+            description: "Beginner, intermediate, or advanced"
+            required: false
+        output:
+          - name: solution
+            type: string
+            description: "Step-by-step solution to the problem"
+          - name: explanation
+            type: string
+            description: "Educational explanation of concepts used"
     ---
 
     # Role
@@ -197,23 +218,108 @@ license: "MIT"
 ---
 ```
 
-### 5.2 Connections
+### 5.2. Agent Interface
 
-This section defines the schema for agent connections to external services and tools. It is **OPTIONAL** but enables agents to interact with external systems and resources.
+This section defines the agent's public "API" or "function signature." It is **REQUIRED** and specifies how the agent receives inputs and produces outputs.
 
 #### 5.2.1. Schema Overview
+
+```yaml
+interface:
+  type: string           # The invocation style: 'service' or 'function'.
+  signature:
+    input: [object]      # A list of input parameter objects.
+    output: [object]     # A list of output parameter objects.
+  exposure:              # Optional, for 'service' type agents.
+    http: object         # Configuration for exposing as an HTTP endpoint.
+    a2a: object          # Configuration for exposing as an A2A-compliant service.
+```
+
+#### 5.2.2. Field Definitions
+
+| Field         | Type     | Required | Description                                                                                             |
+|---------------|----------|----------|---------------------------------------------------------------------------------------------------------|
+| `type`        | `string` | Yes      | The agent's invocation style. Must be one of:<br>- `service`: A network-accessible agent.<br>- `function`: An agent callable within an application. |
+| `signature`   | `object` | Yes      | Defines the agent's input and output parameters. See [Signature Object](#signature-object).                  |
+| `exposure`    | `object` | No       | Configuration for how a `service` agent is exposed. See [Exposure Object](#exposure-object).                |
+
+<a id="signature-object"></a>
+**Signature Object:**
+
+Defines the data contract for the agent.
+
+| Field    | Type    | Required | Description                                                                                                |
+|----------|---------|----------|------------------------------------------------------------------------------------------------------------|
+| `input`  | `array` | Yes      | An array of objects, each defining a named input parameter. The dynamic "user prompt" should be defined here. |
+| `output` | `array` | Yes      | An array of objects, each defining a named output parameter.                                                      |
+
+Each `input` or `output` object has the following structure:
+
+| Key           | Type      | Description                                     |
+|---------------|-----------|-------------------------------------------------|
+| `name`        | `string`  | The name of the parameter (e.g., `user_prompt`). |
+| `type`        | `string`  | The data type (e.g., `string`, `json`, `file`).  |
+| `description` | `string`  | A brief explanation of the parameter.           |
+| `required`    | `boolean` | (For `input` only) Whether the parameter is mandatory. |
+
+<a id="exposure-object"></a>
+**Exposure Object:**
+
+Contains configurations for `service` agents.
+
+| Field  | Type     | Required | Description                                                          |
+|--------|----------|----------|----------------------------------------------------------------------|
+| `http` | `object` | No | Defines how to expose the agent via a standard HTTP endpoint.        |
+| `a2a`  | `object` | No | Defines how the agent is exposed and discovered within an A2A network. See [Section 6.3](#63-agent-card-schema) for Agent Card details. |
+
+#### 5.2.3. Example Usage
+
+Here's an example of an agent interface definition:
+
+```yaml
+interface:
+  type: service
+  signature:
+    input:
+      - name: user_prompt
+        type: string
+        description: "The user's query or request"
+        required: true
+      - name: context
+        type: json
+        description: "Additional context for the request"
+        required: false
+    output:
+      - name: response
+        type: string
+        description: "The agent's response to the user prompt"
+      - name: confidence
+        type: number
+        description: "Confidence score for the response"
+  exposure:
+    a2a:
+      discoverable: true
+      agent_card:
+        name: "Research Assistant"
+        description: "Expert in finding, analyzing, and summarizing research papers"
+        icon: "https://example.com/icons/research-assistant.png"
+```
+
+### 5.3. Connections
+
+This section defines the schema for an agent's **outbound connections** to external tools and other agents. It enables agents to consume external resources.
+
+#### 5.3.1. Schema Overview
 
 The connections fields are specified in the YAML frontmatter of an AFM file:
 
 ```yaml
-# Agent connections schema
 connections:
-  mcp: object         # Model Context Protocol configuration
-  a2a: object         # Agent-to-Agent Protocol configuration
-  # Additional protocol configurations may be added in the future
+  mcp: object         # Configuration for connecting to MCP tools.
+  a2a: object         # Configuration for connecting to Peer Agents.
 ```
 
-#### 5.2.2. Field Definitions
+#### 5.3.2. Field Definitions
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -221,7 +327,20 @@ connections:
 | `connections.mcp` | `object` | No | Configuration for Model Context Protocol. See [Section 6.1](#61-model-context-protocol-mcp) for details. |
 | `connections.a2a` | `object` | No | Configuration for Agent-to-Agent Protocol. See [Section 6.2](#62-agent-to-agent-protocol-a2a) for details. |
 
-#### 5.2.3. Example Usage
+**MCP Connection Object:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `servers` | `array` | Yes | List of MCP servers to connect to. See [Section 6.1](#61-model-context-protocol-mcp) for detailed schema. |
+| `tool_filter` | `object` | No | Filter configuration for tools. See [Section 6.1](#61-model-context-protocol-mcp) for details. |
+
+**A2A Connection Object:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `peers` | `array` | No | List of peer agents to connect to. See [Section 6.2](#62-agent-to-agent-protocol-a2a) for detailed schema. |
+
+#### 5.3.3. Example Usage
 
 Here's a simple example of connections in an AFM file:
 
@@ -233,15 +352,19 @@ connections:
         transport:
           type: "http_sse"
           url: "https://mcp.github.com/api"
+  a2a:
+    peers:
+      - name: "research_assistant"
+        endpoint: "https://agents.example.com/research-assistant"
 ```
 
-### 5.3 Agent Capabilities
+### 5.4. Agent Capabilities
 
 This section defines the schema for agent capabilities - the tools, skills, or functions that the agent can perform.
 
 ## 6. Protocol Extensions
 
-This section details the standard protocol extensions supported by the AFM specification. These protocols enable agents to communicate with external systems and other agents.
+This section provides detailed specifications for the protocols referenced in the [Connections section](#53-connections). These protocols enable agents to communicate with external systems and other agents.
 
 ### 6.1. Model Context Protocol (MCP)
 
@@ -268,18 +391,18 @@ mcp:
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| [`servers`](#mcp-servers) | Array | Yes | Specifies the MCP servers that the agent can connect to. Each server entry must have a unique `name` that identifies the connection. |
-| [`tool_filter`](#mcp-tool-filter) | Object | No | Allows for fine-grained control over which tools from the connected servers are exposed to the agent. |
+| `servers` | Array | Yes | Specifies the MCP servers that the agent can connect to. Each server entry must have a unique `name` that identifies the connection. |
+| `tool_filter` | Object | No | Allows for fine-grained control over which tools from the connected servers are exposed to the agent. |
 
 **Server Object:**
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `name` | String | Yes | A unique, human-readable identifier for the connection. |
-| `transport` | Object | Yes | An object defining the communication mechanism. See [Transport Object](#mcp-transport) below. |
-| `authentication` | Object | No | An object declaring the required authentication scheme. See [Authentication Object](#mcp-authentication) below. |
+| `transport` | Object | Yes | An object defining the communication mechanism. See [Transport Object](#transport-object) below. |
+| `authentication` | Object | No | An object declaring the required authentication scheme. See [Authentication Object](#authentication-object) below. |
 
-**<a id="mcp-transport"></a>Transport Object:**
+**<a id="transport-object"></a>Transport Object:**
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
@@ -287,13 +410,13 @@ mcp:
 | `url` | String | For HTTP types | The URL endpoint of the remote MCP server. |
 | `command` | String | For stdio | The shell command used to start the local MCP server process. |
 
-**<a id="mcp-authentication"></a>Authentication Object:**
+**<a id="authentication-object"></a>Authentication Object:**
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `type` | String | Yes | Authentication scheme (e.g., `oauth2`, `api_key`).<br>The agent's host environment is responsible for managing the actual credentials and authentication flow. |
 
-**<a id="mcp-tool-filter"></a>Tool Filter Object:**
+**Tool Filter Object:**
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
@@ -336,26 +459,66 @@ The Agent-to-Agent Protocol (A2A) enables agents to collaborate with other agent
 #### 6.2.1. Schema Overview
 
 ```yaml
-a2a:
-  exposes_service: boolean   # Whether this agent exposes a discoverable service
-  endpoint: string           # Path or URL endpoint where the agent service is available
-  discoverable: boolean      # Whether the agent should be discoverable by other agents
-  agent_card:                # Optional metadata for agent discovery
-    name: string             # Display name for the agent in service directories
-    description: string      # Brief description of the agent's service capabilities
-    icon: string             # URL to an icon representing the agent service
+connections:
+  a2a:
+    peers:
+      - name: string      # A local alias for the peer agent.
+        endpoint: string  # The network address of the peer agent.
+        # Future fields could include discovery mechanisms, etc.
 ```
 
 #### 6.2.2. Field Definitions
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| `exposes_service` | Boolean | No | Specifies whether the agent should expose a callable service endpoint that other agents can discover and use. Default: `false`. |
-| `endpoint` | String | When `exposes_service` is true | The path or URL where the agent service is available for other agents to call. |
-| `discoverable` | Boolean | No | Controls whether the agent is listed in service directories for other agents to find. Default: `true` when `exposes_service` is true. |
-| `agent_card` | Object | No | Contains metadata used when the agent is listed in service directories. See [Agent Card Object](#a2a-agent-card) below. |
+| `peers` | Array | No | List of peer agents that this agent can connect to and call. |
 
-**<a id="a2a-agent-card"></a>Agent Card Object:**
+**Peer Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `name` | String | Yes | A local alias for the peer agent, used to reference it within this agent's logic. |
+| `endpoint` | String | Yes | The network address or URL where the peer agent service is accessible. |
+
+#### 6.2.3. Example Implementation
+
+```yaml
+connections:
+  a2a:
+    peers:
+      - name: "research_assistant"
+        endpoint: "https://agents.example.com/research-assistant"
+      - name: "data_analyzer"
+        endpoint: "https://internal.company.com/agents/data-analyzer"
+```
+
+### 6.3. Agent Card Schema
+
+The Agent Card provides metadata for service discovery and display when agents expose themselves as services through the A2A protocol.
+
+#### 6.3.1. Schema Overview
+
+```yaml
+interface:
+  exposure:
+    a2a:
+      discoverable: boolean  # Whether the agent should be discoverable by other agents
+      agent_card:            # Optional metadata for agent discovery
+        name: string         # Display name for the agent in service directories
+        description: string  # Brief description of the agent's service capabilities
+        icon: string         # URL to an icon representing the agent service
+```
+
+#### 6.3.2. Field Definitions
+
+**A2A Exposure Object:**
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `discoverable` | Boolean | No | Controls whether the agent is listed in service directories for other agents to find. Default: `true` when exposing as a service. |
+| `agent_card` | Object | No | Contains metadata used when the agent is listed in service directories. See [Agent Card Object](#agent-card-object) below. |
+
+**<a id="agent-card-object"></a>Agent Card Object:**
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
@@ -363,20 +526,18 @@ a2a:
 | `description` | String | No | Brief description of what services the agent provides. Default: Uses the agent's description from its metadata. |
 | `icon` | String | No | URL to an icon representing the agent service. Default: Uses the agent's iconUrl from its metadata. |
 
-#### 6.2.3. Example Implementation
+#### 6.3.3. Example Implementation
 
-This example defines an agent that exposes itself as a collaborative service that other agents can discover and call.
+This example defines an agent that exposes itself as a discoverable service with custom agent card information:
 
 ```yaml
-connections:
-  a2a:
-    exposes_service: true
-    endpoint: "/expert-research-assistant"
-    discoverable: true
-    agent_card:
-      name: "Research Assistant"
-      description: "Expert in finding, analyzing, and summarizing research papers"
-      icon: "https://example.com/icons/research-assistant.png"
+interface:
+  type: service
+  exposure:
+    a2a:
+      discoverable: true
+      agent_card:
+        name: "Research Assistant"
+        description: "Expert in finding, analyzing, and summarizing research papers"
+        icon: "https://example.com/icons/research-assistant.png"
 ```
-
-In this example, the agent is configured to be callable by other agents through the specified endpoint. The agent card provides information that will be displayed when other agents search for available services.
