@@ -229,7 +229,7 @@ textarea[ref="editorRef"] {
 /* Hub & Spoke Editor Styles */
 .hub-spoke-container {
   padding: 2rem;
-  min-height: 500px;
+  min-height: 600px;
   background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);
   border-radius: 12px;
   position: relative;
@@ -239,7 +239,7 @@ textarea[ref="editorRef"] {
 .hub-spoke-wrapper {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,24 +302,30 @@ textarea[ref="editorRef"] {
 }
 
 /* Position spoke groups */
+.instructions-group {
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .model-group {
-  top: 15%;
-  left: 15%;
+  top: 20%;
+  left: 10%;
 }
 
 .memory-group {
-  top: 55%;
-  left: 15%;
+  top: 65%;
+  left: 10%;
 }
 
 .mcp-group {
-  top: 25%;
-  right: 15%;
+  top: 20%;
+  right: 10%;
 }
 
 .a2a-group {
   top: 65%;
-  right: 15%;
+  right: 10%;
 }
 
 .spoke-group-label {
@@ -396,6 +402,14 @@ textarea[ref="editorRef"] {
 }
 
 /* Specific spoke styling */
+.instructions-spoke {
+  border-color: #fd7e14;
+}
+
+.instructions-spoke .spoke-icon {
+  color: #fd7e14;
+}
+
 .model-spoke {
   border-color: #28a745;
 }
@@ -464,11 +478,11 @@ textarea[ref="editorRef"] {
 @media (max-width: 768px) {
   .hub-spoke-container {
     padding: 1rem;
-    min-height: 400px;
+    min-height: 500px;
   }
   
   .hub-spoke-wrapper {
-    height: 400px;
+    height: 500px;
   }
   
   .hub {
@@ -495,6 +509,39 @@ textarea[ref="editorRef"] {
   
   .spoke-icon {
     font-size: 1.25rem;
+  }
+  
+  .spoke-title {
+    font-size: 0.7rem;
+  }
+  
+  .spoke-subtitle {
+    font-size: 0.6rem;
+  }
+  
+  /* Adjust positioning for mobile */
+  .instructions-group {
+    top: 5%;
+  }
+  
+  .model-group {
+    top: 20%;
+    left: 5%;
+  }
+  
+  .memory-group {
+    top: 70%;
+    left: 5%;
+  }
+  
+  .mcp-group {
+    top: 20%;
+    right: 5%;
+  }
+  
+  .a2a-group {
+    top: 70%;
+    right: 5%;
   }
   
   .spoke-title {
@@ -1092,4 +1139,37 @@ textarea[ref="editorRef"] {
 .spoke-icon i {
   font-size: 1.5rem;
   color: #667eea;
+}
+
+/* Example cards styling */
+.example-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e9ecef;
+}
+
+.example-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.example-features .badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.example-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.example-card .card-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.example-card .btn {
+  font-size: 0.875rem;
+  font-weight: 500;
 }

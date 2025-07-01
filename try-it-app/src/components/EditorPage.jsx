@@ -11,8 +11,178 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
   const [easyMDE, setEasyMDE] = useState(null)
   const [previewContent, setPreviewContent] = useState('')
   const [showPreview, setShowPreview] = useState(false)
-  const [isAgentDetailsCollapsed, setIsAgentDetailsCollapsed] = useState(false)
-  const [isAgentConnectionsCollapsed, setIsAgentConnectionsCollapsed] = useState(false)
+  const [isAgentDetailsCollapsed, setIsAgentDetailsCollapsed] = useState(true) // Default to collapsed
+  const [isAgentConnectionsCollapsed, setIsAgentConnectionsCollapsed] = useState(true) // Default to collapsed
+  
+  // Low-code view state
+  const [selectedSpoke, setSelectedSpoke] = useState(null)
+  const [showRightPanel, setShowRightPanel] = useState(false)
+  
+  // Handler for spoke selection in low-code view
+  const handleSpokeSelect = (spokeType) => {
+    setSelectedSpoke(spokeType)
+    setShowRightPanel(true)
+  }
+
+  // MCP Server management
+  const addMcpServer = () => {
+    const newServer = {
+      name: `server_${(metadata.mcpServers?.length || 0) + 1}`,
+      transport: {
+        type: 'http_sse',
+        url: ''
+      }
+    }
+    const updatedServers = [...(metadata.mcpServers || []), newServer]
+    updateMetadataField('mcpServers', updatedServers)
+  }
+
+  const removeMcpServer = (index) => {
+    const updatedServers = metadata.mcpServers.filter((_, i) => i !== index)
+    updateMetadataField('mcpServers', updatedServers)
+  }
+
+  const updateMcpServer = (index, field, value) => {
+    const updatedServers = [...metadata.mcpServers]
+    const fieldPath = field.split('.')
+    let current = updatedServers[index]
+    
+    for (let i = 0; i < fieldPath.length - 1; i++) {
+      if (!current[fieldPath[i]]) current[fieldPath[i]] = {}
+      current = current[fieldPath[i]]
+    }
+    
+    current[fieldPath[fieldPath.length - 1]] = value
+    updateMetadataField('mcpServers', updatedServers)
+  }
+
+  // Render right panel content based on selected spoke
+  const renderRightPanelContent = () => {
+    if (!selectedSpoke) return null
+
+    switch (selectedSpoke) {
+      case 'core':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-robot me-2"></i>
+              Agent Details
+            </h6>
+            {renderMetadataForm()}
+          </div>
+        )
+      
+      case 'instructions':
+        const defaultInstructions = afmContent || `# Role
+
+Describe your agent's role here...
+
+# Capabilities
+
+List your agent's capabilities here:
+
+- Capability 1
+- Capability 2
+- Capability 3
+
+# Instructions
+
+Provide detailed instructions for how your agent should behave...`
+
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-pencil-square me-2"></i>
+              Agent Instructions
+            </h6>
+            <div className="form-group">
+              <label className="form-label">Agent Instructions (Markdown)</label>
+              <textarea
+                className="form-control"
+                rows="15"
+                placeholder="Write your agent instructions here...&#10;&#10;Example:&#10;# Role&#10;You are a helpful assistant...&#10;&#10;# Capabilities&#10;- Answer questions&#10;- Provide explanations&#10;- Help with tasks"
+                value={afmContent}
+                onChange={(e) => setAfmContent(e.target.value)}
+                style={{ 
+                  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+                  fontSize: '14px'
+                }}
+              />
+              <small className="form-text text-muted">
+                Write your agent's instructions in markdown format. Use # for headings, * for lists, etc.
+              </small>
+            </div>
+            {!afmContent && (
+              <button
+                className="btn btn-outline-primary btn-sm mt-2"
+                onClick={() => setAfmContent(defaultInstructions)}
+              >
+                <i className="bi bi-plus me-2"></i>
+                Add Default Template
+              </button>
+            )}
+          </div>
+        )
+      
+      case 'model':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-cpu me-2"></i>
+              Model Provider
+            </h6>
+            <div className="alert alert-info">
+              <i className="bi bi-info-circle me-2"></i>
+              Model Provider configuration will be coming soon. This feature will allow you to configure which AI model your agent uses.
+            </div>
+          </div>
+        )
+      
+      case 'memory':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-memory me-2"></i>
+              Memory
+            </h6>
+            <div className="alert alert-info">
+              <i className="bi bi-info-circle me-2"></i>
+              Memory configuration will be coming soon. This feature will allow you to configure how your agent stores and retrieves conversation history.
+            </div>
+          </div>
+        )
+      
+      case 'mcp':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-diagram-3 me-2"></i>
+              MCP Connections
+            </h6>
+            {renderMcpConnectionsForm()}
+          </div>
+        )
+      
+      case 'a2a':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-people me-2"></i>
+              Agent-to-Agent (A2A)
+            </h6>
+            {renderA2AConnectionsForm()}
+          </div>
+        )
+      
+      default:
+        return (
+          <div className="alert alert-warning">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            Unknown spoke type: {selectedSpoke}
+          </div>
+        )
+    }
+  }
   
   // Metadata form state
   const [metadata, setMetadata] = useState({
@@ -26,7 +196,17 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
     provider: { organization: '', url: '' },
     iconUrl: '',
     mcpServers: [],
-    toolFilters: { allow: [], deny: [] }
+    toolFilters: { allow: [], deny: [] },
+    a2a: {
+      exposes_service: false,
+      endpoint: '',
+      discoverable: true,
+      agent_card: {
+        name: '',
+        description: '',
+        icon: ''
+      }
+    }
   })
   
   const editorRef = useRef(null)
@@ -46,13 +226,27 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
         provider: loadedMetadata.provider || { organization: '', url: '' },
         iconUrl: loadedMetadata.iconUrl || '',
         mcpServers: loadedMetadata.mcpServers || [],
-        toolFilters: loadedMetadata.toolFilters || { allow: [], deny: [] }
+        toolFilters: loadedMetadata.toolFilters || { allow: [], deny: [] },
+        a2a: loadedMetadata.a2a || {
+          exposes_service: false,
+          endpoint: '',
+          discoverable: true,
+          agent_card: {
+            name: '',
+            description: '',
+            icon: ''
+          }
+        }
       })
     }
   }, [isEditingExisting, loadedMetadata])
 
   useEffect(() => {
     if (editorMode === 'pro-code') {
+      // Reset right panel when switching to pro-code
+      setShowRightPanel(false)
+      setSelectedSpoke(null)
+      
       // Clean up any existing editor first
       if (easyMDE) {
         try {
@@ -194,7 +388,11 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
       let current = newMetadata
       
       for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) current[keys[i]] = {}
+        if (!current[keys[i]]) {
+          current[keys[i]] = {}
+        } else {
+          current[keys[i]] = { ...current[keys[i]] }
+        }
         current = current[keys[i]]
       }
       
@@ -254,6 +452,77 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
     if (metadata.namespace) frontMatter.push(`namespace: "${metadata.namespace}"`)
     if (metadata.license) frontMatter.push(`license: "${metadata.license}"`)
     if (metadata.iconUrl) frontMatter.push(`iconUrl: "${metadata.iconUrl}"`)
+    
+    // Add authors if they exist
+    if (metadata.authors && metadata.authors.length > 0) {
+      frontMatter.push('authors:')
+      metadata.authors.forEach(author => {
+        frontMatter.push(`  - "${author}"`)
+      })
+    }
+    
+    // Add provider if it exists
+    if (metadata.provider && (metadata.provider.organization || metadata.provider.url)) {
+      frontMatter.push('provider:')
+      if (metadata.provider.organization) frontMatter.push(`  organization: "${metadata.provider.organization}"`)
+      if (metadata.provider.url) frontMatter.push(`  url: "${metadata.provider.url}"`)
+    }
+    
+    // Add connections if they exist
+    const hasConnections = (metadata.mcpServers && metadata.mcpServers.length > 0) || 
+                          (metadata.a2a && metadata.a2a.exposes_service)
+    
+    if (hasConnections) {
+      frontMatter.push('connections:')
+      
+      // Add MCP connections
+      if (metadata.mcpServers && metadata.mcpServers.length > 0) {
+        frontMatter.push('  mcp:')
+        frontMatter.push('    servers:')
+        metadata.mcpServers.forEach(server => {
+          frontMatter.push(`      - name: "${server.name}"`)
+          if (server.transport) {
+            frontMatter.push('        transport:')
+            if (server.transport.type) frontMatter.push(`          type: "${server.transport.type}"`)
+            if (server.transport.url) frontMatter.push(`          url: "${server.transport.url}"`)
+            if (server.transport.command) frontMatter.push(`          command: "${server.transport.command}"`)
+          }
+        })
+        
+        // Add tool filters if they exist
+        if (metadata.toolFilters && (metadata.toolFilters.allow?.length > 0 || metadata.toolFilters.deny?.length > 0)) {
+          frontMatter.push('    tool_filter:')
+          if (metadata.toolFilters.allow && metadata.toolFilters.allow.length > 0) {
+            frontMatter.push('      allow:')
+            metadata.toolFilters.allow.forEach(tool => {
+              frontMatter.push(`        - "${tool}"`)
+            })
+          }
+          if (metadata.toolFilters.deny && metadata.toolFilters.deny.length > 0) {
+            frontMatter.push('      deny:')
+            metadata.toolFilters.deny.forEach(tool => {
+              frontMatter.push(`        - "${tool}"`)
+            })
+          }
+        }
+      }
+      
+      // Add A2A connections
+      if (metadata.a2a && metadata.a2a.exposes_service) {
+        frontMatter.push('  a2a:')
+        frontMatter.push(`    exposes_service: ${metadata.a2a.exposes_service}`)
+        if (metadata.a2a.endpoint) frontMatter.push(`    endpoint: "${metadata.a2a.endpoint}"`)
+        if (metadata.a2a.discoverable !== undefined) frontMatter.push(`    discoverable: ${metadata.a2a.discoverable}`)
+        
+        if (metadata.a2a.agent_card && (metadata.a2a.agent_card.name || metadata.a2a.agent_card.description || metadata.a2a.agent_card.icon)) {
+          frontMatter.push('    agent_card:')
+          if (metadata.a2a.agent_card.name) frontMatter.push(`      name: "${metadata.a2a.agent_card.name}"`)
+          if (metadata.a2a.agent_card.description) frontMatter.push(`      description: "${metadata.a2a.agent_card.description}"`)
+          if (metadata.a2a.agent_card.icon) frontMatter.push(`      icon: "${metadata.a2a.agent_card.icon}"`)
+        }
+      }
+    }
+    
     frontMatter.push('---')
     frontMatter.push('')
     
@@ -341,6 +610,245 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
       setShowPreview(false)
       setEditorMode('pro-code')
     }
+  }
+
+  // Render MCP connections form
+  const renderMcpConnectionsForm = () => {
+    return (
+      <div>
+        <div className="form-group mb-3">
+          <label className="form-label">MCP Servers</label>
+          <div className="alert alert-info">
+            <i className="bi bi-info-circle me-2"></i>
+            Configure Model Context Protocol servers that provide tools and resources to your agent.
+          </div>
+          
+          {metadata.mcpServers && metadata.mcpServers.length > 0 ? (
+            <div className="mb-3">
+              {metadata.mcpServers.map((server, index) => (
+                <div key={index} className="card mb-2">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-6">
+                        <label className="form-label small">Server Name</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={server.name || ''}
+                          onChange={(e) => updateMcpServer(index, 'name', e.target.value)}
+                          placeholder="e.g., github_api"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label small">Transport Type</label>
+                        <select
+                          className="form-control form-control-sm"
+                          value={server.transport?.type || 'http_sse'}
+                          onChange={(e) => updateMcpServer(index, 'transport.type', e.target.value)}
+                        >
+                          <option value="http_sse">HTTP SSE</option>
+                          <option value="stdio">STDIO</option>
+                          <option value="streamable_http">Streamable HTTP</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="row mt-2">
+                      <div className="col-md-10">
+                        {server.transport?.type === 'stdio' ? (
+                          <>
+                            <label className="form-label small">Command</label>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              value={server.transport?.command || ''}
+                              onChange={(e) => updateMcpServer(index, 'transport.command', e.target.value)}
+                              placeholder="e.g., npx -y @modelcontextprotocol/server-filesystem"
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <label className="form-label small">URL</label>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              value={server.transport?.url || ''}
+                              onChange={(e) => updateMcpServer(index, 'transport.url', e.target.value)}
+                              placeholder="e.g., https://mcp.github.com/api"
+                            />
+                          </>
+                        )}
+                      </div>
+                      <div className="col-md-2 d-flex align-items-end">
+                        <button 
+                          className="btn btn-outline-danger btn-sm w-100"
+                          onClick={() => removeMcpServer(index)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-muted p-3 text-center border rounded mb-3">
+              <i className="bi bi-plus-circle me-2"></i>
+              No MCP servers configured
+            </div>
+          )}
+          
+          <button 
+            className="btn btn-outline-primary btn-sm"
+            onClick={addMcpServer}
+          >
+            <i className="bi bi-plus me-2"></i>
+            Add MCP Server
+          </button>
+        </div>
+
+        <div className="form-group mb-3">
+          <label className="form-label">Tool Filters</label>
+          <div className="row">
+            <div className="col-md-6">
+              <label className="form-label small">Allow Tools</label>
+              <textarea
+                className="form-control"
+                rows="3"
+                placeholder="server_name/tool_name&#10;(one per line)"
+                value={metadata.toolFilters?.allow?.join('\n') || ''}
+                onChange={(e) => {
+                  const allowList = e.target.value.split('\n').filter(line => line.trim())
+                  updateNestedMetadata('toolFilters.allow', allowList)
+                }}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label small">Deny Tools</label>
+              <textarea
+                className="form-control"
+                rows="3"
+                placeholder="server_name/tool_name&#10;(one per line)"
+                value={metadata.toolFilters?.deny?.join('\n') || ''}
+                onChange={(e) => {
+                  const denyList = e.target.value.split('\n').filter(line => line.trim())
+                  updateNestedMetadata('toolFilters.deny', denyList)
+                }}
+              />
+            </div>
+          </div>
+          <small className="form-text text-muted">
+            Specify which tools to allow or deny in "server_name/tool_name" format.
+          </small>
+        </div>
+      </div>
+    )
+  }
+
+  // Render A2A connections form
+  const renderA2AConnectionsForm = () => {
+    return (
+      <div>
+        <div className="form-group mb-3">
+          <label className="form-label">Agent-to-Agent Configuration</label>
+          <div className="alert alert-info">
+            <i className="bi bi-info-circle me-2"></i>
+            Configure how this agent collaborates with other agents in a multi-agent system.
+          </div>
+        </div>
+
+        <div className="form-group mb-3">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="exposes-service"
+              checked={metadata.a2a?.exposes_service || false}
+              onChange={(e) => updateNestedMetadata('a2a.exposes_service', e.target.checked)}
+            />
+            <label className="form-check-label" htmlFor="exposes-service">
+              Expose as Service
+            </label>
+          </div>
+          <small className="form-text text-muted">
+            Allow other agents to discover and call this agent.
+          </small>
+        </div>
+
+        {metadata.a2a?.exposes_service && (
+          <>
+            <div className="form-group mb-3">
+              <label className="form-label">Service Endpoint</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="/expert-research-assistant"
+                value={metadata.a2a?.endpoint || ''}
+                onChange={(e) => updateNestedMetadata('a2a.endpoint', e.target.value)}
+              />
+              <small className="form-text text-muted">
+                The path where other agents can call this agent.
+              </small>
+            </div>
+
+            <div className="form-group mb-3">
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="discoverable"
+                  checked={metadata.a2a?.discoverable !== false}
+                  onChange={(e) => updateNestedMetadata('a2a.discoverable', e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="discoverable">
+                  Discoverable
+                </label>
+              </div>
+              <small className="form-text text-muted">
+                List this agent in service directories for other agents to find.
+              </small>
+            </div>
+
+            <div className="form-group mb-3">
+              <label className="form-label">Agent Card</label>
+              <div className="mb-2">
+                <label className="form-label small">Service Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Research Assistant"
+                  value={metadata.a2a?.agent_card?.name || ''}
+                  onChange={(e) => updateNestedMetadata('a2a.agent_card.name', e.target.value)}
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small">Service Description</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Expert in finding, analyzing, and summarizing research papers"
+                  value={metadata.a2a?.agent_card?.description || ''}
+                  onChange={(e) => updateNestedMetadata('a2a.agent_card.description', e.target.value)}
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small">Service Icon URL</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="https://example.com/icons/research-assistant.png"
+                  value={metadata.a2a?.agent_card?.icon || ''}
+                  onChange={(e) => updateNestedMetadata('a2a.agent_card.icon', e.target.value)}
+                />
+              </div>
+              <small className="form-text text-muted">
+                Information displayed when other agents search for available services.
+              </small>
+            </div>
+          </>
+        )}
+      </div>
+    )
   }
 
   const renderMetadataForm = () => {
@@ -548,16 +1056,16 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
           </div>
           {!isAgentConnectionsCollapsed && (
             <div className="metadata-section-content">
+              {/* MCP Connections */}
               <div className="form-group mb-3">
                 <label className="form-label">MCP Connections</label>
-                <div className="alert alert-info">
-                  <i className="bi bi-info-circle me-2"></i>
-                  MCP (Model Context Protocol) connections will be implemented in a future version.
-                </div>
+                {renderMcpConnectionsForm()}
               </div>
 
-              <div className="text-muted p-3 text-center mt-4">
-                <p>Additional connection options will be available in future versions.</p>
+              {/* A2A Connections */}
+              <div className="form-group mb-3">
+                <label className="form-label">Agent-to-Agent (A2A)</label>
+                {renderA2AConnectionsForm()}
               </div>
             </div>
           )}
@@ -659,18 +1167,20 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
         </div>
       </div>
 
-      {/* Editor Content - 2 Column Layout */}
+      {/* Editor Content - Dynamic Layout based on mode */}
       <div className="row mt-3">
-        {/* Left Column - Markdown Editor */}
+        {/* Left Column - Markdown Editor / Hub-Spoke */}
         {!showPreview && (
-          <div className="col-lg-6">
+          <div className={editorMode === 'hub-spoke' && showRightPanel ? 'col-lg-8' : 'col-lg-6'}>
             <div className="card h-100">
               <div className="card-header">
                 <h6 className="mb-0 small">
                   <i className="bi bi-pencil-square me-2"></i>
-                  Describe your Agent
+                  {editorMode === 'pro-code' ? 'Describe your Agent' : 'Agent Builder'}
                 </h6>
-                <p className="text-muted small mb-0 mt-1">Write a brief description of your agent's purpose and functionality.</p>
+                {editorMode === 'pro-code' && (
+                  <p className="text-muted small mb-0 mt-1">Write a brief description of your agent's purpose and functionality.</p>
+                )}
               </div>
               <div className="card-body p-0">
                 {editorMode === 'pro-code' ? (
@@ -705,6 +1215,7 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
                       updateMetadata={setMetadata}
                       afmContent={afmContent}
                       setAfmContent={setAfmContent}
+                      onSpokeSelect={handleSpokeSelect}
                     />
                   </div>
                 )}
@@ -713,18 +1224,40 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
           </div>
         )}
 
-        {/* Right Column - Metadata Editor */}
+        {/* Right Column - Metadata Editor (Pro-code) or Spoke Details (Low-code) */}
         {!showPreview && (
-          <div className="col-lg-6">
+          <div className={editorMode === 'hub-spoke' && showRightPanel ? 'col-lg-4' : 'col-lg-6'}>
             <div className="card h-100">
-              <div className="card-header">
+              <div className="card-header d-flex justify-content-between align-items-center">
                 <h6 className="mb-0 small">
                   <i className="bi bi-gear me-2"></i>
-                  Agent Metadata
+                  {editorMode === 'pro-code' ? 'Agent Metadata' : (selectedSpoke ? `${selectedSpoke.charAt(0).toUpperCase() + selectedSpoke.slice(1)} Configuration` : 'Select a Component')}
                 </h6>
+                {editorMode === 'hub-spoke' && showRightPanel && (
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => {
+                      setShowRightPanel(false)
+                      setSelectedSpoke(null)
+                    }}
+                  >
+                    <i className="bi bi-x"></i>
+                  </button>
+                )}
               </div>
               <div className="card-body" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                {renderMetadataForm()}
+                {editorMode === 'pro-code' ? (
+                  renderMetadataForm()
+                ) : (
+                  showRightPanel ? (
+                    renderRightPanelContent()
+                  ) : (
+                    <div className="text-muted text-center p-4">
+                      <i className="bi bi-mouse3 display-4 mb-3"></i>
+                      <p>Click on the agent core or any spoke to configure that component.</p>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>

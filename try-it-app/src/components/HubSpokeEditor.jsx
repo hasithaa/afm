@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 
-const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent }) => {
+const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent, onSpokeSelect }) => {
   const [selectedSpoke, setSelectedSpoke] = useState(null)
 
   const handleSpokeClick = (spokeType) => {
     console.log('Spoke clicked:', spokeType)
     setSelectedSpoke(spokeType)
-    // This would open modals for editing each spoke in a full implementation
-    alert(`${spokeType} configuration coming soon! This would open a detailed editor for configuring the ${spokeType} component.`)
+    if (onSpokeSelect) {
+      onSpokeSelect(spokeType)
+    }
   }
 
   return (
@@ -24,6 +25,22 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
 
         {/* Spokes */}
         <div className="spokes-container">
+          {/* Agent Instructions Spoke */}
+          <div className="spoke-group instructions-group">
+            <div className="spoke-group-label">Instructions</div>
+            <div className="spoke-group-items">
+              <div 
+                className={`spoke instructions-spoke ${selectedSpoke === 'instructions' ? 'selected' : ''}`}
+                onClick={() => handleSpokeClick('instructions')}
+                data-spoke="instructions"
+              >
+                <div className="spoke-icon">📝</div>
+                <div className="spoke-title">Agent Instructions</div>
+                <div className="spoke-subtitle">Define Behavior</div>
+              </div>
+            </div>
+          </div>
+
           {/* Model Provider Spoke */}
           <div className="spoke-group model-group">
             <div className="spoke-group-label">Model</div>
@@ -68,7 +85,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
                 <div className="spoke-icon">
                   <i className="bi bi-diagram-3"></i>
                 </div>
-                <div className="spoke-title">Add MCP</div>
+                <div className="spoke-title">Agent MCP</div>
                 <div className="spoke-subtitle">External Tools</div>
               </div>
               {/* Dynamic MCP spokes would be rendered here */}
@@ -77,7 +94,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
 
           {/* Peer Agents (A2A) */}
           <div className="spoke-group a2a-group">
-            <div className="spoke-group-label">Peer Agents (A2A)</div>
+            <div className="spoke-group-label">Peer Agents</div>
             <div className="spoke-group-items">
               <div 
                 className={`spoke a2a-spoke add-spoke ${selectedSpoke === 'a2a' ? 'selected' : ''}`}
@@ -85,7 +102,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
                 data-spoke="a2a"
               >
                 <div className="spoke-icon">👥</div>
-                <div className="spoke-title">Add A2A</div>
+                <div className="spoke-title">Agents</div>
                 <div className="spoke-subtitle">Agent Network</div>
               </div>
               {/* Dynamic A2A spokes would be rendered here */}
@@ -96,10 +113,11 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
         {/* Connection Lines */}
         <svg className="connections" viewBox="0 0 800 600">
           {/* Lines from hub to spokes */}
-          <line x1="400" y1="300" x2="250" y2="150" stroke="#e0e0e0" strokeWidth="2" />
-          <line x1="400" y1="300" x2="250" y2="350" stroke="#e0e0e0" strokeWidth="2" />
-          <line x1="400" y1="300" x2="550" y2="200" stroke="#e0e0e0" strokeWidth="2" />
-          <line x1="400" y1="300" x2="550" y2="400" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="400" y2="80" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="160" y2="180" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="160" y2="420" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="640" y2="180" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="640" y2="420" stroke="#e0e0e0" strokeWidth="2" />
         </svg>
       </div>
 
@@ -107,7 +125,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent })
       <div className="hub-spoke-instructions">
         <div className="alert alert-info">
           <i className="bi bi-info-circle me-2"></i>
-          Click on any spoke to configure that component of your agent. 
+          Click on the agent core or any spoke to configure that component of your agent. 
           The visual editor helps you build your agent by connecting different capabilities.
           {selectedSpoke && (
             <div className="mt-2">

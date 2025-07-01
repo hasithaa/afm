@@ -1,0 +1,48 @@
+---
+identifier: "test-agent"
+name: "Test Agent"
+description: "A test agent for verification"
+version: "1.0.0"
+namespace: "testing"
+license: "MIT"
+authors:
+  - "Test User <test@example.com>"
+provider:
+  organization: "Test Org"
+  url: "https://test.org"
+iconUrl: "https://example.com/icon.png"
+connections:
+  mcp:
+    servers:
+      - name: "test_server"
+        transport:
+          type: "http_sse"
+          url: "https://api.test.com"
+    tool_filter:
+      allow:
+        - "test_server/test_tool"
+  a2a:
+    exposes_service: true
+    endpoint: "/test-agent"
+    discoverable: true
+    agent_card:
+      name: "Test Agent Service"
+      description: "A test agent service"
+      icon: "https://example.com/service-icon.png"
+---
+
+# Role
+
+This is a test agent for verifying the AFM editor functionality.
+
+# Capabilities
+
+- Test capability 1
+- Test capability 2
+- Test capability 3
+
+# Instructions
+
+- Follow test protocols
+- Respond with test data
+- Maintain test consistency

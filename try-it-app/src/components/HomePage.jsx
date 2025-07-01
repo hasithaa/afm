@@ -9,6 +9,163 @@ const HomePage = ({ setCurrentAfmId, setIsEditingExisting, setAfmContent, setLoa
   const [dragover, setDragover] = useState(false)
   const navigate = useNavigate()
 
+  // Example AFM files
+  const examples = [
+    {
+      id: 'math-tutor',
+      title: 'Math Tutor',
+      description: 'An AI assistant that helps with mathematics problems, with MCP integration for external computation tools',
+      content: `# Role
+
+The Math Tutor is an AI agent designed to assist students with mathematics problems, providing explanations, step-by-step solutions, and practice exercises.
+
+# Capabilities
+
+This agent should be able to:
+
+- Answer questions about mathematical concepts
+- Solve equations and provide step-by-step solutions
+- Generate practice problems and quizzes
+- Provide explanations and tips for solving math problems
+- Create graphs and visualizations for mathematical functions
+- Access external mathematical computation tools via MCP
+
+# Instructions
+
+- Use clear and concise language when explaining concepts
+- Provide examples to illustrate complex ideas
+- Encourage students to think critically and solve problems independently
+- When using external tools, explain what the tool does before using it
+- Always show your work step-by-step
+- Adapt explanations to the student's level of understanding`,
+      metadata: {
+        identifier: 'math-tutor',
+        name: 'Math Tutor',
+        description: 'An AI assistant that helps with mathematics problems',
+        version: '1.0.0',
+        namespace: 'education',
+        license: 'MIT',
+        authors: ['Jane Smith <jane@example.com>'],
+        provider: {
+          organization: 'Example AI Solutions',
+          url: 'https://example.com'
+        },
+        iconUrl: 'https://example.com/math-icon.png',
+        mcpServers: [
+          {
+            name: 'wolfram_alpha',
+            transport: {
+              type: 'http_sse',
+              url: 'https://mcp.wolframalpha.com/api'
+            }
+          },
+          {
+            name: 'graphing_tools',
+            transport: {
+              type: 'stdio',
+              command: 'npx -y @modelcontextprotocol/server-graphing'
+            }
+          }
+        ],
+        toolFilters: {
+          allow: ['wolfram_alpha/solve_equation', 'wolfram_alpha/calculate', 'graphing_tools/plot_function'],
+          deny: []
+        },
+        a2a: {
+          exposes_service: true,
+          endpoint: '/math-tutor',
+          discoverable: true,
+          agent_card: {
+            name: 'Math Tutor Service',
+            description: 'Expert mathematics tutoring and problem solving',
+            icon: 'https://example.com/math-tutor-service.png'
+          }
+        }
+      }
+    },
+    {
+      id: 'simple-assistant',
+      title: 'Simple Assistant',
+      description: 'A basic AI assistant for general tasks without external connections',
+      content: `# Role
+
+You are a helpful AI assistant designed to help users with general questions and tasks.
+
+# Capabilities
+
+This agent should be able to:
+
+- Answer general knowledge questions
+- Provide explanations and summaries
+- Help with writing and editing
+- Offer suggestions and recommendations
+- Engage in helpful conversations
+
+# Instructions
+
+- Be polite and professional in all interactions
+- Provide accurate and helpful information
+- Ask clarifying questions when needed
+- Be concise but thorough in responses
+- Admit when you don't know something`,
+      metadata: {
+        identifier: 'simple-assistant',
+        name: 'Simple Assistant',
+        description: 'A helpful AI assistant for general tasks',
+        version: '1.0.0',
+        namespace: 'general',
+        license: 'MIT',
+        authors: ['Example User <user@example.com>']
+      }
+    },
+    {
+      id: 'research-agent',
+      title: 'Research Agent',
+      description: 'A research-focused agent with collaboration capabilities',
+      content: `# Role
+
+The Research Agent is specialized in finding, analyzing, and summarizing research papers and academic content.
+
+# Capabilities
+
+This agent should be able to:
+
+- Search for and analyze research papers
+- Summarize complex academic content
+- Identify key findings and conclusions
+- Compare different research approaches
+- Provide citations and references
+- Collaborate with other research agents
+
+# Instructions
+
+- Always provide accurate citations
+- Maintain objectivity when analyzing research
+- Explain complex concepts in understandable terms
+- Flag potential conflicts of interest or biases
+- Suggest related research areas when relevant`,
+      metadata: {
+        identifier: 'research-agent',
+        name: 'Research Agent',
+        description: 'Expert in finding, analyzing, and summarizing research papers',
+        version: '1.0.0',
+        namespace: 'research',
+        license: 'MIT',
+        authors: ['Research Team <research@example.com>'],
+        a2a: {
+          exposes_service: true,
+          endpoint: '/research-agent',
+          discoverable: true,
+          agent_card: {
+            name: 'Research Assistant',
+            description: 'Expert in finding, analyzing, and summarizing research papers',
+            icon: 'https://example.com/icons/research-assistant.png'
+          }
+        }
+      }
+    }
+  ]
+
   useEffect(() => {
     loadSavedAfms()
   }, [])
@@ -149,6 +306,14 @@ const HomePage = ({ setCurrentAfmId, setIsEditingExisting, setAfmContent, setLoa
     loadSavedAfms()
   }
 
+  const handleLoadExample = (example) => {
+    setCurrentAfmId(null)
+    setIsEditingExisting(false)
+    setAfmContent(example.content)
+    setLoadedMetadata(example.metadata)
+    navigate('/editor')
+  }
+
   const handleRunAfm = (afm, e) => {
     e.stopPropagation()
     setAfmContent(afm.content)
@@ -220,6 +385,15 @@ const HomePage = ({ setCurrentAfmId, setIsEditingExisting, setAfmContent, setLoa
             </li>
             <li className="nav-item">
               <button 
+                className={`nav-link ${activeTab === 'examples' ? 'active' : ''}`}
+                onClick={() => setActiveTab('examples')}
+              >
+                <i className="bi bi-collection me-2"></i>
+                Examples
+              </button>
+            </li>
+            <li className="nav-item">
+              <button 
                 className={`nav-link ${activeTab === 'saved' ? 'active' : ''}`}
                 onClick={() => setActiveTab('saved')}
               >
@@ -251,6 +425,61 @@ const HomePage = ({ setCurrentAfmId, setIsEditingExisting, setAfmContent, setLoa
                   style={{ display: 'none' }}
                   onChange={handleFileUpload}
                 />
+              </div>
+            </div>
+          )}
+
+          {/* Examples Tab */}
+          {activeTab === 'examples' && (
+            <div className="tab-content">
+              <div className="alert alert-info">
+                <i className="bi bi-info-circle me-2"></i>
+                <strong>Example AFM Files:</strong> Try these pre-built examples to see AFM in action. Click "Load Example" to open any example in the editor.
+              </div>
+              
+              <div className="row">
+                {examples.map((example) => (
+                  <div key={example.id} className="col-md-6 col-lg-4 mb-4">
+                    <div className="card h-100 example-card">
+                      <div className="card-body">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <h5 className="card-title">{example.title}</h5>
+                          <span className="badge bg-primary">{example.metadata.namespace || 'general'}</span>
+                        </div>
+                        <p className="card-text text-muted small mb-3">{example.description}</p>
+                        
+                        {/* Features */}
+                        <div className="example-features mb-3">
+                          {example.metadata.mcpServers && example.metadata.mcpServers.length > 0 && (
+                            <span className="badge bg-warning me-1 mb-1">
+                              <i className="bi bi-diagram-3 me-1"></i>
+                              MCP
+                            </span>
+                          )}
+                          {example.metadata.a2a && example.metadata.a2a.exposes_service && (
+                            <span className="badge bg-info me-1 mb-1">
+                              <i className="bi bi-people me-1"></i>
+                              A2A
+                            </span>
+                          )}
+                          {example.metadata.version && (
+                            <span className="badge bg-secondary me-1 mb-1">
+                              v{example.metadata.version}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <button 
+                          className="btn btn-primary btn-sm w-100"
+                          onClick={() => handleLoadExample(example)}
+                        >
+                          <i className="bi bi-play-circle me-2"></i>
+                          Load Example
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

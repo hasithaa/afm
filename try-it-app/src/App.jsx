@@ -19,7 +19,7 @@ function App() {
   }, [])
 
   return (
-    <Router>
+    <Router basename="/try-it">
       <div className="App">
         <Header />
         <DebugConsole />

@@ -15,7 +15,7 @@ copyright: Copyright &copy; 2025
 theme:
   name: material
   logo: assets/logo.svg
-  favicon: assets/favicon.png
+  favicon: assets/favicon.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
