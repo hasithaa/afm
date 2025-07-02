@@ -1,23 +1,12 @@
 // Default AFM template content
-export const DEFAULT_AFM_CONTENT = `---
-name: "New Agent"
-description: "A helpful AI assistant"
-version: "1.0.0"
-namespace: "general"
-license: "MIT"
-authors:
-  - "Your Name <your.email@example.com>"
----
+export const DEFAULT_AFM_CONTENT = `# Role
 
-# Role
-
-Describe the role and purpose of the agent.
+<!-- Describe the role and purpose of the agent. -->
 
 # Instructions
 
-- Describe how the agent should behave
-- List specific instructions or guidelines
-- Include any constraints or limitations`
+<!-- Describe how the agent should behave -->`
+
 
 export const SAMPLE_AFM_CONTENT = `---
 name: "Math Tutor"

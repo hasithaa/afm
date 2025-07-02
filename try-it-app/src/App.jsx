@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Header from './components/Header'
 import HomePage from './components/HomePage'
 import EditorPage from './components/EditorPage'
-import PreviewPage from './components/PreviewPage'
 import DebugConsole from './components/DebugConsole'
 import { debugLog } from './utils/debug'
 import './App.css'
@@ -46,14 +45,6 @@ function App() {
                 setAfmContent={setAfmContent}
                 loadedMetadata={loadedMetadata}
                 setLoadedMetadata={setLoadedMetadata}
-              />
-            } 
-          />
-          <Route 
-            path="/preview" 
-            element={
-              <PreviewPage 
-                afmContent={afmContent}
               />
             } 
           />

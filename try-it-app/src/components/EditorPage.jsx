@@ -12,6 +12,7 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
   const [previewContent, setPreviewContent] = useState('')
   const [showPreview, setShowPreview] = useState(false)
   const [isAgentDetailsCollapsed, setIsAgentDetailsCollapsed] = useState(true) // Default to collapsed
+  const [isAgentInterfaceCollapsed, setIsAgentInterfaceCollapsed] = useState(true) // Default to collapsed
   const [isAgentConnectionsCollapsed, setIsAgentConnectionsCollapsed] = useState(true) // Default to collapsed
   
   // Low-code view state
@@ -27,23 +28,23 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
   // MCP Server management
   const addMcpServer = () => {
     const newServer = {
-      name: `server_${(metadata.mcpServers?.length || 0) + 1}`,
+      name: `server_${(metadata.connections.mcp.servers?.length || 0) + 1}`,
       transport: {
         type: 'http_sse',
         url: ''
       }
     }
-    const updatedServers = [...(metadata.mcpServers || []), newServer]
-    updateMetadataField('mcpServers', updatedServers)
+    const updatedServers = [...(metadata.connections.mcp.servers || []), newServer]
+    updateNestedMetadata('connections.mcp.servers', updatedServers)
   }
 
   const removeMcpServer = (index) => {
-    const updatedServers = metadata.mcpServers.filter((_, i) => i !== index)
-    updateMetadataField('mcpServers', updatedServers)
+    const updatedServers = metadata.connections.mcp.servers.filter((_, i) => i !== index)
+    updateNestedMetadata('connections.mcp.servers', updatedServers)
   }
 
   const updateMcpServer = (index, field, value) => {
-    const updatedServers = [...metadata.mcpServers]
+    const updatedServers = [...metadata.connections.mcp.servers]
     const fieldPath = field.split('.')
     let current = updatedServers[index]
     
@@ -53,7 +54,72 @@ const EditorPage = ({ currentAfmId, isEditingExisting, afmContent, setAfmContent
     }
     
     current[fieldPath[fieldPath.length - 1]] = value
-    updateMetadataField('mcpServers', updatedServers)
+    updateNestedMetadata('connections.mcp.servers', updatedServers)
+  }
+
+  // A2A Peer management
+  const addA2aPeer = () => {
+    const newPeer = {
+      name: `peer_${(metadata.connections.a2a.peers?.length || 0) + 1}`,
+      endpoint: ''
+    }
+    const updatedPeers = [...(metadata.connections.a2a.peers || []), newPeer]
+    updateNestedMetadata('connections.a2a.peers', updatedPeers)
+  }
+
+  const removeA2aPeer = (index) => {
+    const updatedPeers = metadata.connections.a2a.peers.filter((_, i) => i !== index)
+    updateNestedMetadata('connections.a2a.peers', updatedPeers)
+  }
+
+  const updateA2aPeer = (index, field, value) => {
+    const updatedPeers = [...metadata.connections.a2a.peers]
+    updatedPeers[index] = { ...updatedPeers[index], [field]: value }
+    updateNestedMetadata('connections.a2a.peers', updatedPeers)
+  }
+
+  // Interface parameter management
+  const addInputParameter = () => {
+    const newParam = {
+      name: `param_${(metadata.interface.signature.input?.length || 0) + 1}`,
+      type: 'string',
+      description: '',
+      required: false
+    }
+    const updatedInput = [...(metadata.interface.signature.input || []), newParam]
+    updateNestedMetadata('interface.signature.input', updatedInput)
+  }
+
+  const removeInputParameter = (index) => {
+    const updatedInput = metadata.interface.signature.input.filter((_, i) => i !== index)
+    updateNestedMetadata('interface.signature.input', updatedInput)
+  }
+
+  const updateInputParameter = (index, field, value) => {
+    const updatedInput = [...metadata.interface.signature.input]
+    updatedInput[index] = { ...updatedInput[index], [field]: value }
+    updateNestedMetadata('interface.signature.input', updatedInput)
+  }
+
+  const addOutputParameter = () => {
+    const newParam = {
+      name: `output_${(metadata.interface.signature.output?.length || 0) + 1}`,
+      type: 'string',
+      description: ''
+    }
+    const updatedOutput = [...(metadata.interface.signature.output || []), newParam]
+    updateNestedMetadata('interface.signature.output', updatedOutput)
+  }
+
+  const removeOutputParameter = (index) => {
+    const updatedOutput = metadata.interface.signature.output.filter((_, i) => i !== index)
+    updateNestedMetadata('interface.signature.output', updatedOutput)
+  }
+
+  const updateOutputParameter = (index, field, value) => {
+    const updatedOutput = [...metadata.interface.signature.output]
+    updatedOutput[index] = { ...updatedOutput[index], [field]: value }
+    updateNestedMetadata('interface.signature.output', updatedOutput)
   }
 
   // Render right panel content based on selected spoke
@@ -152,6 +218,17 @@ Provide detailed instructions for how your agent should behave...`
           </div>
         )
       
+      case 'interface':
+        return (
+          <div>
+            <h6 className="text-primary mb-3">
+              <i className="bi bi-gear-wide-connected me-2"></i>
+              Agent Interface
+            </h6>
+            {renderInterfaceForm()}
+          </div>
+        )
+      
       case 'mcp':
         return (
           <div>
@@ -195,16 +272,50 @@ Provide detailed instructions for how your agent should behave...`
     authors: [],
     provider: { organization: '', url: '' },
     iconUrl: '',
-    mcpServers: [],
-    toolFilters: { allow: [], deny: [] },
-    a2a: {
-      exposes_service: false,
-      endpoint: '',
-      discoverable: true,
-      agent_card: {
-        name: '',
-        description: '',
-        icon: ''
+    interface: {
+      type: 'function',
+      signature: {
+        input: [
+          {
+            name: 'user_prompt',
+            type: 'string',
+            description: 'The user input or query',
+            required: true
+          }
+        ],
+        output: [
+          {
+            name: 'response',
+            type: 'string',
+            description: 'The agent response'
+          }
+        ]
+      },
+      exposure: {
+        http: {
+          path: '',
+          authentication: { type: '' }
+        },
+        a2a: {
+          discoverable: true,
+          agent_card: {
+            name: '',
+            description: '',
+            icon: ''
+          }
+        }
+      }
+    },
+    connections: {
+      mcp: {
+        servers: [],
+        tool_filter: {
+          allow: [],
+          deny: []
+        }
+      },
+      a2a: {
+        peers: []
       }
     }
   })
@@ -212,9 +323,9 @@ Provide detailed instructions for how your agent should behave...`
   const editorRef = useRef(null)
   const navigate = useNavigate()
 
-  // Load metadata when editing existing AFM
+  // Load metadata when editing existing AFM or loading from examples
   useEffect(() => {
-    if (isEditingExisting && loadedMetadata) {
+    if (loadedMetadata) {
       setMetadata({
         identifier: loadedMetadata.identifier || '',
         name: loadedMetadata.name || '',
@@ -225,21 +336,56 @@ Provide detailed instructions for how your agent should behave...`
         authors: loadedMetadata.authors || [],
         provider: loadedMetadata.provider || { organization: '', url: '' },
         iconUrl: loadedMetadata.iconUrl || '',
-        mcpServers: loadedMetadata.mcpServers || [],
-        toolFilters: loadedMetadata.toolFilters || { allow: [], deny: [] },
-        a2a: loadedMetadata.a2a || {
-          exposes_service: false,
-          endpoint: '',
-          discoverable: true,
-          agent_card: {
-            name: '',
-            description: '',
-            icon: ''
+        interface: {
+          type: loadedMetadata.interface?.type || 'function',
+          signature: {
+            input: loadedMetadata.interface?.signature?.input || [
+              {
+                name: 'user_prompt',
+                type: 'string',
+                description: 'The user input or query',
+                required: true
+              }
+            ],
+            output: loadedMetadata.interface?.signature?.output || [
+              {
+                name: 'response',
+                type: 'string',
+                description: 'The agent response'
+              }
+            ]
+          },
+          exposure: {
+            http: {
+              path: loadedMetadata.interface?.exposure?.http?.path || '',
+              authentication: loadedMetadata.interface?.exposure?.http?.authentication || { type: '' }
+            },
+            a2a: {
+              discoverable: loadedMetadata.interface?.exposure?.a2a?.discoverable !== undefined ? 
+                           loadedMetadata.interface.exposure.a2a.discoverable : true,
+              agent_card: {
+                name: loadedMetadata.interface?.exposure?.a2a?.agent_card?.name || '',
+                description: loadedMetadata.interface?.exposure?.a2a?.agent_card?.description || '',
+                icon: loadedMetadata.interface?.exposure?.a2a?.agent_card?.icon || ''
+              }
+            }
+          }
+        },
+        connections: {
+          mcp: {
+            servers: loadedMetadata.connections?.mcp?.servers || loadedMetadata.mcpServers || [],
+            tool_filter: {
+              allow: loadedMetadata.connections?.mcp?.tool_filter?.allow || loadedMetadata.toolFilters?.allow || [],
+              deny: loadedMetadata.connections?.mcp?.tool_filter?.deny || loadedMetadata.toolFilters?.deny || []
+            }
+          },
+          a2a: {
+            peers: loadedMetadata.connections?.a2a?.peers || []
           }
         }
       })
     }
-  }, [isEditingExisting, loadedMetadata])
+  }, [loadedMetadata])
 
   useEffect(() => {
     if (editorMode === 'pro-code') {
@@ -427,14 +573,6 @@ Provide detailed instructions for how your agent should behave...`
     navigate('/')
   }
 
-  const handlePreview = () => {
-    const content = getCurrentContent()
-    if (content) {
-      setAfmContent(content)
-    }
-    navigate('/preview')
-  }
-
   const getCurrentContent = () => {
     if (editorMode === 'pro-code' && easyMDE) {
       return easyMDE.value()
@@ -468,18 +606,92 @@ Provide detailed instructions for how your agent should behave...`
       if (metadata.provider.url) frontMatter.push(`  url: "${metadata.provider.url}"`)
     }
     
+    // Add interface section
+    const hasInterface = metadata.interface && (
+      metadata.interface.type !== 'function' || 
+      metadata.interface.signature?.input?.length > 1 ||
+      metadata.interface.signature?.output?.length > 1 ||
+      (metadata.interface.type === 'service' && metadata.interface.exposure)
+    )
+    
+    if (hasInterface) {
+      frontMatter.push('interface:')
+      frontMatter.push(`  type: ${metadata.interface.type}`)
+      
+      // Add signature
+      if (metadata.interface.signature) {
+        frontMatter.push('  signature:')
+        
+        // Add input parameters
+        if (metadata.interface.signature.input && metadata.interface.signature.input.length > 0) {
+          frontMatter.push('    input:')
+          metadata.interface.signature.input.forEach(param => {
+            frontMatter.push(`      - name: ${param.name}`)
+            frontMatter.push(`        type: ${param.type}`)
+            if (param.description) frontMatter.push(`        description: "${param.description}"`)
+            if (param.required !== undefined) frontMatter.push(`        required: ${param.required}`)
+          })
+        }
+        
+        // Add output parameters
+        if (metadata.interface.signature.output && metadata.interface.signature.output.length > 0) {
+          frontMatter.push('    output:')
+          metadata.interface.signature.output.forEach(param => {
+            frontMatter.push(`      - name: ${param.name}`)
+            frontMatter.push(`        type: ${param.type}`)
+            if (param.description) frontMatter.push(`        description: "${param.description}"`)
+          })
+        }
+      }
+      
+      // Add exposure for service type
+      if (metadata.interface.type === 'service' && metadata.interface.exposure) {
+        const hasExposure = (metadata.interface.exposure.http?.path) || 
+                           (metadata.interface.exposure.a2a?.discoverable !== undefined || 
+                            metadata.interface.exposure.a2a?.agent_card?.name)
+        
+        if (hasExposure) {
+          frontMatter.push('  exposure:')
+          
+          // Add HTTP exposure
+          if (metadata.interface.exposure.http?.path) {
+            frontMatter.push('    http:')
+            frontMatter.push(`      path: "${metadata.interface.exposure.http.path}"`)
+            if (metadata.interface.exposure.http.authentication?.type) {
+              frontMatter.push('      authentication:')
+              frontMatter.push(`        type: "${metadata.interface.exposure.http.authentication.type}"`)
+            }
+          }
+          
+          // Add A2A exposure
+          const a2aExposure = metadata.interface.exposure.a2a
+          if (a2aExposure && (a2aExposure.discoverable !== undefined || a2aExposure.agent_card?.name)) {
+            frontMatter.push('    a2a:')
+            if (a2aExposure.discoverable !== undefined) frontMatter.push(`      discoverable: ${a2aExposure.discoverable}`)
+            
+            if (a2aExposure.agent_card && (a2aExposure.agent_card.name || a2aExposure.agent_card.description || a2aExposure.agent_card.icon)) {
+              frontMatter.push('      agent_card:')
+              if (a2aExposure.agent_card.name) frontMatter.push(`        name: "${a2aExposure.agent_card.name}"`)
+              if (a2aExposure.agent_card.description) frontMatter.push(`        description: "${a2aExposure.agent_card.description}"`)
+              if (a2aExposure.agent_card.icon) frontMatter.push(`        icon: "${a2aExposure.agent_card.icon}"`)
+            }
+          }
+        }
+      }
+    }
+    
     // Add connections if they exist
-    const hasConnections = (metadata.mcpServers && metadata.mcpServers.length > 0) || 
-                          (metadata.a2a && metadata.a2a.exposes_service)
+    const hasConnections = (metadata.connections?.mcp?.servers?.length > 0) || 
+                          (metadata.connections?.a2a?.peers?.length > 0)
     
     if (hasConnections) {
       frontMatter.push('connections:')
       
       // Add MCP connections
-      if (metadata.mcpServers && metadata.mcpServers.length > 0) {
+      if (metadata.connections.mcp?.servers?.length > 0) {
         frontMatter.push('  mcp:')
         frontMatter.push('    servers:')
-        metadata.mcpServers.forEach(server => {
+        metadata.connections.mcp.servers.forEach(server => {
           frontMatter.push(`      - name: "${server.name}"`)
           if (server.transport) {
             frontMatter.push('        transport:')
@@ -487,39 +699,39 @@ Provide detailed instructions for how your agent should behave...`
             if (server.transport.url) frontMatter.push(`          url: "${server.transport.url}"`)
             if (server.transport.command) frontMatter.push(`          command: "${server.transport.command}"`)
           }
+          if (server.authentication?.type) {
+            frontMatter.push('        authentication:')
+            frontMatter.push(`          type: "${server.authentication.type}"`)
+          }
         })
         
         // Add tool filters if they exist
-        if (metadata.toolFilters && (metadata.toolFilters.allow?.length > 0 || metadata.toolFilters.deny?.length > 0)) {
+        const toolFilter = metadata.connections.mcp.tool_filter
+        if (toolFilter && (toolFilter.allow?.length > 0 || toolFilter.deny?.length > 0)) {
           frontMatter.push('    tool_filter:')
-          if (metadata.toolFilters.allow && metadata.toolFilters.allow.length > 0) {
+          if (toolFilter.allow && toolFilter.allow.length > 0) {
             frontMatter.push('      allow:')
-            metadata.toolFilters.allow.forEach(tool => {
+            toolFilter.allow.forEach(tool => {
               frontMatter.push(`        - "${tool}"`)
             })
           }
-          if (metadata.toolFilters.deny && metadata.toolFilters.deny.length > 0) {
+          if (toolFilter.deny && toolFilter.deny.length > 0) {
             frontMatter.push('      deny:')
-            metadata.toolFilters.deny.forEach(tool => {
+            toolFilter.deny.forEach(tool => {
               frontMatter.push(`        - "${tool}"`)
             })
           }
         }
       }
       
-      // Add A2A connections
-      if (metadata.a2a && metadata.a2a.exposes_service) {
+      // Add A2A peer connections
+      if (metadata.connections.a2a?.peers?.length > 0) {
         frontMatter.push('  a2a:')
-        frontMatter.push(`    exposes_service: ${metadata.a2a.exposes_service}`)
-        if (metadata.a2a.endpoint) frontMatter.push(`    endpoint: "${metadata.a2a.endpoint}"`)
-        if (metadata.a2a.discoverable !== undefined) frontMatter.push(`    discoverable: ${metadata.a2a.discoverable}`)
-        
-        if (metadata.a2a.agent_card && (metadata.a2a.agent_card.name || metadata.a2a.agent_card.description || metadata.a2a.agent_card.icon)) {
-          frontMatter.push('    agent_card:')
-          if (metadata.a2a.agent_card.name) frontMatter.push(`      name: "${metadata.a2a.agent_card.name}"`)
-          if (metadata.a2a.agent_card.description) frontMatter.push(`      description: "${metadata.a2a.agent_card.description}"`)
-          if (metadata.a2a.agent_card.icon) frontMatter.push(`      icon: "${metadata.a2a.agent_card.icon}"`)
-        }
+        frontMatter.push('    peers:')
+        metadata.connections.a2a.peers.forEach(peer => {
+          frontMatter.push(`      - name: "${peer.name}"`)
+          if (peer.endpoint) frontMatter.push(`        endpoint: "${peer.endpoint}"`)
+        })
       }
     }
     
@@ -623,9 +835,9 @@ Provide detailed instructions for how your agent should behave...`
             Configure Model Context Protocol servers that provide tools and resources to your agent.
           </div>
           
-          {metadata.mcpServers && metadata.mcpServers.length > 0 ? (
+          {metadata.connections?.mcp?.servers && metadata.connections.mcp.servers.length > 0 ? (
             <div className="mb-3">
-              {metadata.mcpServers.map((server, index) => (
+              {metadata.connections.mcp.servers.map((server, index) => (
                 <div key={index} className="card mb-2">
                   <div className="card-body">
                     <div className="row">
@@ -687,6 +899,23 @@ Provide detailed instructions for how your agent should behave...`
                         </button>
                       </div>
                     </div>
+                    
+                    {/* Authentication Section */}
+                    <div className="row mt-2">
+                      <div className="col-md-12">
+                        <label className="form-label small">Authentication Type (Optional)</label>
+                        <select
+                          className="form-control form-control-sm"
+                          value={server.authentication?.type || ''}
+                          onChange={(e) => updateMcpServer(index, 'authentication.type', e.target.value)}
+                        >
+                          <option value="">None</option>
+                          <option value="oauth2">OAuth 2.0</option>
+                          <option value="api_key">API Key</option>
+                          <option value="bearer">Bearer Token</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -716,10 +945,10 @@ Provide detailed instructions for how your agent should behave...`
                 className="form-control"
                 rows="3"
                 placeholder="server_name/tool_name&#10;(one per line)"
-                value={metadata.toolFilters?.allow?.join('\n') || ''}
+                value={metadata.connections?.mcp?.tool_filter?.allow?.join('\n') || ''}
                 onChange={(e) => {
                   const allowList = e.target.value.split('\n').filter(line => line.trim())
-                  updateNestedMetadata('toolFilters.allow', allowList)
+                  updateNestedMetadata('connections.mcp.tool_filter.allow', allowList)
                 }}
               />
             </div>
@@ -729,10 +958,10 @@ Provide detailed instructions for how your agent should behave...`
                 className="form-control"
                 rows="3"
                 placeholder="server_name/tool_name&#10;(one per line)"
-                value={metadata.toolFilters?.deny?.join('\n') || ''}
+                value={metadata.connections?.mcp?.tool_filter?.deny?.join('\n') || ''}
                 onChange={(e) => {
                   const denyList = e.target.value.split('\n').filter(line => line.trim())
-                  updateNestedMetadata('toolFilters.deny', denyList)
+                  updateNestedMetadata('connections.mcp.tool_filter.deny', denyList)
                 }}
               />
             </div>
@@ -749,108 +978,364 @@ Provide detailed instructions for how your agent should behave...`
   const renderA2AConnectionsForm = () => {
     return (
       <div>
-        <div className="form-group mb-3">
-          <label className="form-label">Agent-to-Agent Configuration</label>
+        {/* A2A Peer Connections */}
+        <div className="form-group mb-4">
+          <label className="form-label">Peer Agent Connections</label>
           <div className="alert alert-info">
             <i className="bi bi-info-circle me-2"></i>
-            Configure how this agent collaborates with other agents in a multi-agent system.
+            Configure peer agents that this agent can connect to and call for collaboration.
           </div>
+          
+          {metadata.connections?.a2a?.peers && metadata.connections.a2a.peers.length > 0 ? (
+            <div className="mb-3">
+              {metadata.connections.a2a.peers.map((peer, index) => (
+                <div key={index} className="card mb-2">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-5">
+                        <label className="form-label small">Peer Name</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={peer.name || ''}
+                          onChange={(e) => updateA2aPeer(index, 'name', e.target.value)}
+                          placeholder="e.g., research_assistant"
+                        />
+                      </div>
+                      <div className="col-md-5">
+                        <label className="form-label small">Endpoint URL</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={peer.endpoint || ''}
+                          onChange={(e) => updateA2aPeer(index, 'endpoint', e.target.value)}
+                          placeholder="e.g., https://agents.example.com/research-assistant"
+                        />
+                      </div>
+                      <div className="col-md-2 d-flex align-items-end">
+                        <button 
+                          className="btn btn-outline-danger btn-sm w-100"
+                          onClick={() => removeA2aPeer(index)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-muted p-3 text-center border rounded mb-3">
+              <i className="bi bi-plus-circle me-2"></i>
+              No peer agents configured
+            </div>
+          )}
+          
+          <button 
+            className="btn btn-outline-primary btn-sm"
+            onClick={addA2aPeer}
+          >
+            <i className="bi bi-plus me-2"></i>
+            Add Peer Agent
+          </button>
         </div>
 
+        {/* Service Exposure Configuration */}
         <div className="form-group mb-3">
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="exposes-service"
-              checked={metadata.a2a?.exposes_service || false}
-              onChange={(e) => updateNestedMetadata('a2a.exposes_service', e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="exposes-service">
-              Expose as Service
-            </label>
+          <label className="form-label">Service Exposure</label>
+          <div className="alert alert-warning">
+            <i className="bi bi-info-circle me-2"></i>
+            Service exposure configuration is managed in the <strong>Interface</strong> section when the agent type is set to "service".
           </div>
           <small className="form-text text-muted">
-            Allow other agents to discover and call this agent.
+            To expose this agent as a service for other agents to call, configure the interface type as "service" and set up the exposure settings in the Interface section.
           </small>
         </div>
-
-        {metadata.a2a?.exposes_service && (
-          <>
-            <div className="form-group mb-3">
-              <label className="form-label">Service Endpoint</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="/expert-research-assistant"
-                value={metadata.a2a?.endpoint || ''}
-                onChange={(e) => updateNestedMetadata('a2a.endpoint', e.target.value)}
-              />
-              <small className="form-text text-muted">
-                The path where other agents can call this agent.
-              </small>
-            </div>
-
-            <div className="form-group mb-3">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="discoverable"
-                  checked={metadata.a2a?.discoverable !== false}
-                  onChange={(e) => updateNestedMetadata('a2a.discoverable', e.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="discoverable">
-                  Discoverable
-                </label>
-              </div>
-              <small className="form-text text-muted">
-                List this agent in service directories for other agents to find.
-              </small>
-            </div>
-
-            <div className="form-group mb-3">
-              <label className="form-label">Agent Card</label>
-              <div className="mb-2">
-                <label className="form-label small">Service Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Research Assistant"
-                  value={metadata.a2a?.agent_card?.name || ''}
-                  onChange={(e) => updateNestedMetadata('a2a.agent_card.name', e.target.value)}
-                />
-              </div>
-              <div className="mb-2">
-                <label className="form-label small">Service Description</label>
-                <textarea
-                  className="form-control"
-                  rows="2"
-                  placeholder="Expert in finding, analyzing, and summarizing research papers"
-                  value={metadata.a2a?.agent_card?.description || ''}
-                  onChange={(e) => updateNestedMetadata('a2a.agent_card.description', e.target.value)}
-                />
-              </div>
-              <div className="mb-2">
-                <label className="form-label small">Service Icon URL</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="https://example.com/icons/research-assistant.png"
-                  value={metadata.a2a?.agent_card?.icon || ''}
-                  onChange={(e) => updateNestedMetadata('a2a.agent_card.icon', e.target.value)}
-                />
-              </div>
-              <small className="form-text text-muted">
-                Information displayed when other agents search for available services.
-              </small>
-            </div>
-          </>
-        )}
       </div>
     )
   }
 
+  // Render Interface form
+  const renderInterfaceForm = () => {
+    return (
+      <div>
+        {/* Interface Type */}
+        <div className="form-group mb-4">
+          <label className="form-label">Interface Type</label>
+          <div className="alert alert-info">
+            <i className="bi bi-info-circle me-2"></i>
+            Define how this agent is invoked. Functions are callable within applications, while services are network-accessible.
+          </div>
+          <select
+            className="form-control"
+            value={metadata.interface?.type || 'function'}
+            onChange={(e) => updateNestedMetadata('interface.type', e.target.value)}
+          >
+            <option value="function">Function (callable within application)</option>
+            <option value="service">Service (network-accessible)</option>
+          </select>
+        </div>
+
+        {/* Input Parameters */}
+        <div className="form-group mb-4">
+          <label className="form-label">Input Parameters</label>
+          <small className="form-text text-muted d-block mb-2">
+            Define the parameters that this agent accepts as input.
+          </small>
+          
+          {metadata.interface?.signature?.input && metadata.interface.signature.input.length > 0 ? (
+            <div className="mb-3">
+              {metadata.interface.signature.input.map((param, index) => (
+                <div key={index} className="card mb-2">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-3">
+                        <label className="form-label small">Parameter Name</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={param.name || ''}
+                          onChange={(e) => updateInputParameter(index, 'name', e.target.value)}
+                          placeholder="e.g., user_prompt"
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label small">Type</label>
+                        <select
+                          className="form-control form-control-sm"
+                          value={param.type || 'string'}
+                          onChange={(e) => updateInputParameter(index, 'type', e.target.value)}
+                        >
+                          <option value="string">string</option>
+                          <option value="number">number</option>
+                          <option value="boolean">boolean</option>
+                          <option value="json">json</option>
+                          <option value="file">file</option>
+                        </select>
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label small">Description</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={param.description || ''}
+                          onChange={(e) => updateInputParameter(index, 'description', e.target.value)}
+                          placeholder="Brief description of this parameter"
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label small">Required</label>
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={param.required || false}
+                            onChange={(e) => updateInputParameter(index, 'required', e.target.checked)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-1 d-flex align-items-end">
+                        <button 
+                          className="btn btn-outline-danger btn-sm w-100"
+                          onClick={() => removeInputParameter(index)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-muted p-3 text-center border rounded mb-3">
+              <i className="bi bi-plus-circle me-2"></i>
+              No input parameters defined
+            </div>
+          )}
+          
+          <button 
+            className="btn btn-outline-primary btn-sm"
+            onClick={addInputParameter}
+          >
+            <i className="bi bi-plus me-2"></i>
+            Add Input Parameter
+          </button>
+        </div>
+
+        {/* Output Parameters */}
+        <div className="form-group mb-4">
+          <label className="form-label">Output Parameters</label>
+          <small className="form-text text-muted d-block mb-2">
+            Define what this agent returns as output.
+          </small>
+          
+          {metadata.interface?.signature?.output && metadata.interface.signature.output.length > 0 ? (
+            <div className="mb-3">
+              {metadata.interface.signature.output.map((param, index) => (
+                <div key={index} className="card mb-2">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-3">
+                        <label className="form-label small">Parameter Name</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={param.name || ''}
+                          onChange={(e) => updateOutputParameter(index, 'name', e.target.value)}
+                          placeholder="e.g., response"
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="form-label small">Type</label>
+                        <select
+                          className="form-control form-control-sm"
+                          value={param.type || 'string'}
+                          onChange={(e) => updateOutputParameter(index, 'type', e.target.value)}
+                        >
+                          <option value="string">string</option>
+                          <option value="number">number</option>
+                          <option value="boolean">boolean</option>
+                          <option value="json">json</option>
+                          <option value="file">file</option>
+                        </select>
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label small">Description</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={param.description || ''}
+                          onChange={(e) => updateOutputParameter(index, 'description', e.target.value)}
+                          placeholder="Brief description of this output"
+                        />
+                      </div>
+                      <div className="col-md-1 d-flex align-items-end">
+                        <button 
+                          className="btn btn-outline-danger btn-sm w-100"
+                          onClick={() => removeOutputParameter(index)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-muted p-3 text-center border rounded mb-3">
+              <i className="bi bi-plus-circle me-2"></i>
+              No output parameters defined
+            </div>
+          )}
+          
+          <button 
+            className="btn btn-outline-primary btn-sm"
+            onClick={addOutputParameter}
+          >
+            <i className="bi bi-plus me-2"></i>
+            Add Output Parameter
+          </button>
+        </div>
+
+        {/* Service Exposure (only for service type) */}
+        {metadata.interface?.type === 'service' && (
+          <div className="form-group mb-4">
+            <label className="form-label">Service Exposure</label>
+            <div className="alert alert-warning">
+              <i className="bi bi-info-circle me-2"></i>
+              Configure how this service is exposed to other systems and agents.
+            </div>
+
+            {/* HTTP Exposure */}
+            <div className="form-group mb-3">
+              <label className="form-label">HTTP Endpoint</label>
+              <div className="mb-2">
+                <label className="form-label small">Path</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={metadata.interface?.exposure?.http?.path || ''}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.http.path', e.target.value)}
+                  placeholder="/math-tutor"
+                />
+                <small className="form-text text-muted">
+                  The URL path where this agent service will be accessible.
+                </small>
+              </div>
+              <div className="mb-2">
+                <label className="form-label small">Authentication Type (Optional)</label>
+                <select
+                  className="form-control"
+                  value={metadata.interface?.exposure?.http?.authentication?.type || ''}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.http.authentication.type', e.target.value)}
+                >
+                  <option value="">None</option>
+                  <option value="oauth2">OAuth 2.0</option>
+                  <option value="api_key">API Key</option>
+                  <option value="bearer">Bearer Token</option>
+                </select>
+              </div>
+            </div>
+
+            {/* A2A Exposure */}
+            <div className="form-group mb-3">
+              <label className="form-label">Agent-to-Agent (A2A) Exposure</label>
+              <div className="form-check mb-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="a2a-discoverable"
+                  checked={metadata.interface?.exposure?.a2a?.discoverable !== false}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.a2a.discoverable', e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="a2a-discoverable">
+                  Discoverable by other agents
+                </label>
+              </div>
+              
+              <div className="mb-2">
+                <label className="form-label small">Agent Card Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={metadata.interface?.exposure?.a2a?.agent_card?.name || ''}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.a2a.agent_card.name', e.target.value)}
+                  placeholder="Math Tutor Service"
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small">Agent Card Description</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  value={metadata.interface?.exposure?.a2a?.agent_card?.description || ''}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.a2a.agent_card.description', e.target.value)}
+                  placeholder="Expert mathematics tutoring and problem solving"
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small">Agent Card Icon URL</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={metadata.interface?.exposure?.a2a?.agent_card?.icon || ''}
+                  onChange={(e) => updateNestedMetadata('interface.exposure.a2a.agent_card.icon', e.target.value)}
+                  placeholder="https://example.com/icons/math-tutor.png"
+                />
+              </div>
+              <small className="form-text text-muted">
+                Information displayed when other agents discover this service.
+              </small>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+  
   const renderMetadataForm = () => {
     return (
       <div className="metadata-section">
@@ -1036,6 +1521,27 @@ Provide detailed instructions for how your agent should behave...`
                   </small>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Agent Interface Section */}
+        <div className="metadata-main-section mb-4">
+          <div 
+            className="metadata-section-header clickable"
+            onClick={() => setIsAgentInterfaceCollapsed(!isAgentInterfaceCollapsed)}
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="text-primary mb-0">
+                <i className="bi bi-gear-wide-connected me-2"></i>
+                Agent Interface
+              </h6>
+              <i className={`bi ${isAgentInterfaceCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'}`}></i>
+            </div>
+          </div>
+          {!isAgentInterfaceCollapsed && (
+            <div className="metadata-section-content">
+              {renderInterfaceForm()}
             </div>
           )}
         </div>

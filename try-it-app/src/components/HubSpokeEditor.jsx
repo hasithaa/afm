@@ -73,6 +73,24 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent, o
             </div>
           </div>
 
+          {/* Agent Interface Spoke */}
+          <div className="spoke-group interface-group">
+            <div className="spoke-group-label">Interface</div>
+            <div className="spoke-group-items">
+              <div 
+                className={`spoke interface-spoke ${selectedSpoke === 'interface' ? 'selected' : ''}`}
+                onClick={() => handleSpokeClick('interface')}
+                data-spoke="interface"
+              >
+                <div className="spoke-icon">
+                  <i className="bi bi-gear-wide-connected"></i>
+                </div>
+                <div className="spoke-title">Agent Interface</div>
+                <div className="spoke-subtitle">Input/Output & Exposure</div>
+              </div>
+            </div>
+          </div>
+
           {/* MCP Connections */}
           <div className="spoke-group mcp-group">
             <div className="spoke-group-label">MCP Connections</div>
@@ -115,6 +133,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent, o
           {/* Lines from hub to spokes */}
           <line x1="400" y1="300" x2="400" y2="80" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="160" y2="180" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="160" y2="300" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="160" y2="420" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="640" y2="180" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="640" y2="420" stroke="#e0e0e0" strokeWidth="2" />

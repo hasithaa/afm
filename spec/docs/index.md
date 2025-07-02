@@ -6,34 +6,39 @@ hide:
 
 # Agent Flavored Markdown (AFM)
 
-AFM provides a structured, markdown-based format for defining the capabilities, behaviors, and knowledge of AI agents. The goal is to create a universal standard that allows agents to be easily shared, deployed, and understood across different platforms
+A simple, markdown-based format for defining AI agents. Write agents in plain text that any platform can understand and deploy.
 
+```markdown
+# Role
+I'm a friendly math tutor who explains concepts step-by-step.
+
+# Instructions
+- Use simple language
+- Show your work
+- Be encouraging and patient
+```
 
 ## Why AFM?
 
 <div class="grid cards" markdown>
 
-- :fontawesome-solid-book-open-reader: __Human-Readability__
+- :fontawesome-solid-feather: __Simple__
 
-    ---
+    Write agents in plain markdown. No complex code or proprietary formats required.
 
-    Utilize a simple, elegant markdown-based syntax that is intuitive for both developers and non-technical stakeholders to read, write, and understand.
+- :material-share-variant: __Shareable__
 
-- :material-account-group: __Collaboration__
+    AFM agents work across different platforms and tools. Write once, deploy anywhere.
 
-    ---
+- :material-account-group: __Collaborative__
 
-    AFM is designed to be composable, supporting not only the definition of individual agents but also complex, multi-agent systems where agents can collaborate and delegate tasks to one another.
-
-- :material-handshake: __Interoperability__
-
-    ---
-
-    Provide a standard, unambiguous syntax for agent declaration, ensuring that diverse platforms and tools can consistently use the same agent blueprint.
+    Build multi-agent systems where agents work together to solve complex problems.
 
 </div>
 
-## The AFM Workflow
+**Want to learn more?** Check out [Why AFM?](topics/why-afm.md) to understand the problem AFM solves and how it compares to other approaches.
+
+<!-- ## The AFM Workflow
 
 The process is designed to be straightforward. Agents are defined in natural language, allowing everyone can contribute to the agent's capabilities. Once defined, these agents can be deployed and interacted with seamlessly. 
     
@@ -46,15 +51,14 @@ The process is designed to be straightforward. Agents are defined in natural lan
 </div>
 
 !!! warning "WIP"
-    Update this section with more detailed explanations and a diagram.
+    Update this section with more detailed explanations and a diagram. -->
 
-## Get Started with AFM
-
-Ready to dive in? Read the full specification to learn the syntax, or visit our interactive playground to start building your own agent.
+## Get Started
 
 <div class="button-container">
-    <a href="spec/" class="md-button md-button--primary">Read the Specification</a>
-    <a href="/try-it/" class="md-button">Try It!</a>
+    <a href="specification.md" class="md-button md-button--primary">Read the Spec</a>
+    <a href="../try-it/" class="md-button">Try It Out</a>
+    <a href="topics/" class="md-button">Learn More</a>
 </div>
 
 
