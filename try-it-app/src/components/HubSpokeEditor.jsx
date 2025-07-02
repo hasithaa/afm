@@ -133,7 +133,7 @@ const HubSpokeEditor = ({ metadata, updateMetadata, afmContent, setAfmContent, o
           {/* Lines from hub to spokes */}
           <line x1="400" y1="300" x2="400" y2="80" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="160" y2="180" stroke="#e0e0e0" strokeWidth="2" />
-          <line x1="400" y1="300" x2="160" y2="300" stroke="#e0e0e0" strokeWidth="2" />
+          <line x1="400" y1="300" x2="160" y2="250" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="160" y2="420" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="640" y2="180" stroke="#e0e0e0" strokeWidth="2" />
           <line x1="400" y1="300" x2="640" y2="420" stroke="#e0e0e0" strokeWidth="2" />

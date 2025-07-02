@@ -318,6 +318,11 @@ textarea[ref="editorRef"] {
   left: 10%;
 }
 
+.interface-group {
+  top: 42%;
+  left: 10%;
+}
+
 .mcp-group {
   top: 20%;
   right: 10%;
@@ -424,6 +429,14 @@ textarea[ref="editorRef"] {
 
 .memory-spoke .spoke-icon {
   color: #17a2b8;
+}
+
+.interface-spoke {
+  border-color: #e83e8c;
+}
+
+.interface-spoke .spoke-icon {
+  color: #e83e8c;
 }
 
 .mcp-spoke {
