@@ -1,5 +1,4 @@
 ---
-identifier: "math-tutor"
 name: "Math Tutor"
 description: "An AI assistant that helps with mathematics problems"
 version: "1.0.0"
@@ -11,6 +10,36 @@ provider:
   organization: "Example AI Solutions"
   url: "https://example.com"
 iconUrl: "https://example.com/math-icon.png"
+
+interface:
+  type: service
+  signature:
+    input:
+      - name: user_prompt
+        type: string
+        description: "The student's math question or problem"
+        required: true
+      - name: difficulty_level
+        type: string
+        description: "Beginner, intermediate, or advanced"
+        required: false
+    output:
+      - name: solution
+        type: string
+        description: "Step-by-step solution to the problem"
+      - name: explanation
+        type: string
+        description: "Educational explanation of concepts used"
+  exposure:
+    http:
+      path: "/math-tutor"
+    a2a:
+      discoverable: true
+      agent_card:
+        name: "Math Tutor Service"
+        description: "Expert mathematics tutoring and problem solving"
+        icon: "https://example.com/math-tutor-service.png"
+
 connections:
   mcp:
     servers:
@@ -27,30 +56,11 @@ connections:
         - "wolfram_alpha/solve_equation"
         - "wolfram_alpha/calculate"
         - "graphing_tools/plot_function"
-  a2a:
-    exposes_service: true
-    endpoint: "/math-tutor"
-    discoverable: true
-    agent_card:
-      name: "Math Tutor Service"
-      description: "Expert mathematics tutoring and problem solving"
-      icon: "https://example.com/math-tutor-service.png"
 ---
 
 # Role
 
 The Math Tutor is an AI agent designed to assist students with mathematics problems, providing explanations, step-by-step solutions, and practice exercises.
-
-# Capabilities
-
-This agent should be able to:
-
-- Answer questions about mathematical concepts
-- Solve equations and provide step-by-step solutions
-- Generate practice problems and quizzes
-- Provide explanations and tips for solving math problems
-- Create graphs and visualizations for mathematical functions
-- Access external mathematical computation tools via MCP
 
 # Instructions
 
@@ -60,3 +70,9 @@ This agent should be able to:
 - When using external tools, explain what the tool does before using it
 - Always show your work step-by-step
 - Adapt explanations to the student's level of understanding
+- Answer questions about mathematical concepts
+- Solve equations and provide step-by-step solutions
+- Generate practice problems and quizzes when requested
+- Provide explanations and tips for solving math problems
+- Create graphs and visualizations for mathematical functions
+- Access external mathematical computation tools via MCP

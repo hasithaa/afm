@@ -107,12 +107,12 @@ extra:
 # Navigation structure
 nav:
   - Home: index.md
-  - Specification: specification.md
   - Topics:
       - Introduction: topics/index.md
       - Why AFM?: topics/why-afm.md
       - Connected Agents: topics/afm-connected-agent.md
       - Rich Editor Experience: topics/rich-editor-experience.md
+  - Specification: specification.md
   - 'Try It!': /try-it/
 
 # Include images in documentation

@@ -11,38 +11,42 @@ AFM (Agent Flavored Markdown) provides a structured, markdown-based format for d
 
 AFM is designed to be composable. It supports not only the definition of individual agents but also complex, multi-agent systems where agents can collaborate and delegate tasks to one another.
 
-This document details the AFM file format, its syntax, and the schema for defining an agent. For a more detailed implementation guide, refer to the [AFM Implementation Guide](#).
+This document details the AFM file format, its syntax, and the schema for defining an agent. For a more detailed implementation guide, refer to the [AFM Implementation Guide](topics/implementation-guide.md).
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)] when, and only when, they appear in all capitals, as shown here.
-
+<!-- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)] when, and only when, they appear in all capitals, as shown here. -->
 
 
 ### 1.1. Key Goals of AFM
 
-- **Human-Readability**: AFM uses a simple, elegant markdown-based syntax that is intuitive for both developers and non-technical stakeholders to read, write, and understand.
-- **Interoperability**: AFM provides a standard, unambiguous syntax for agent definition, ensuring that diverse platforms and tools can consistently use the same agent blueprint.
+AFM addresses the current fragmentation in the AI agent ecosystem by providing a unified standard for agent definition and interoperability:
 
-!!! warning "WIP"
-    Update this section with more detailed explanations of core concepts as the specification evolves.
+- **Simple Syntax**: Move away from complex, imperative code. AFM allows developers to *declare* an agent's properties, tools, and configurations in a simple, text-based format.
+- **Human-Readability**: AFM uses a simple, elegant markdown-based syntax that is intuitive for both developers and non-technical stakeholders to read, write, and understand.
+- **Adaptable**: By building the framework around a flexible format rather than embedding it deep within a programming language, we can evolve the standard alongside the fast-changing AI landscape.
+- **Unified Experience**: Provide a clean, declarative model that works seamlessly for both developers writing code and those using visual, low-code interfaces. The same AFM file can power both experiences.
+- **Agent Duality**: Natively support the dual nature of agents as both callable functions within an application (i.e. Ambiant Agent) and as exposable services (i.e. Chat Agent) for interoperability.
+- **Interoperability**: AFM provides a standard, unambiguous syntax for agent definition, ensuring that diverse platforms and tools can consistently use the same agent blueprint.
 
 
 ## 2. Core Concepts
 
-AFM is built around a few core concepts that define how agents are structured and interact:
+AFM is built around several core concepts that define how agents are structured and interact:
 
-* **Agent**: The primary entity defined in AFM, representing an AI agent with specific capabilities and behaviors.
-* **Role**: A specific function or set of responsibilities that an agent can perform.
-* **Capability**: A specific skill or function that an agent can perform, such as answering questions, performing calculations, or interacting with external systems.
-
-!!! warning "WIP"
-    Update this section with more detailed explanations of core concepts as the specification evolves.
+- **Agent**: The primary entity defined in AFM, representing an AI agent with specific capabilities and behaviors.
+- **Role**: A specific function or set of responsibilities that an agent can perform, described in natural language within a specific context.
+- **Instructions**: Natural language directives that guide the agent's behavior and task execution, also known as the system prompt.
+- **Agent Details**: Programmatic metadata that describes the agent, including name, version, author, and other identifying information.
+- **Connections**: Mechanisms that enable agents to connect to external tools, services, and other agents for enhanced functionality.
+- **Interface**: Specifications for how agents expose themselves to the outside world, defining their callable signature and service endpoints.
+- **Model**: Configuration for the Large Language Model (LLM) used by the agent *(coming soon)*.
+- **Memory**: Mechanisms for how agents can store and retrieve information across interactions *(coming soon)*.
 
 ## 3. File Format and Content
 
-An agent definition file must use the `*.afm.md` or `.afm` extension. The filename without the extension part serves as the agent's unique artifact ID within its namespace. 
-The file name should not start with special characters, numbers, or whitespace. 
+An agent definition file must use the `*.afm.md` or `.afm` extension. The filename without the extension part serves as the agent's unique artifact ID within its [namespace](#field-namespace). This ID is the "Agent Identifier" and is **REQUIRED**.
 
-The file name **MUST** be unique within the namespace to avoid conflicts.
+The "Agent Identifier" should not start with special characters, numbers, or whitespace. 
+The "Agent Identifier" **MUST** be unique within the namespace to avoid conflicts. 
 
 The file content must be encoded in UTF-8. 
 
@@ -59,26 +63,22 @@ The file content must be encoded in UTF-8.
 An AFM file is structured into two main sections: the front matter and the agent declaration.
 
 * **Front Matter**: Contains metadata about the agent.
-* **Markdown Body**: Contains the agent's declaration, capabilities, and behaviors. additional information needed for its operation.
-
+* **Markdown Body**: Contains the agent's main declaration.
 
 ### 4.2. Front Matter
 
 The front matter is a YAML block at the top of the file, enclosed by `---` lines. Refer to the [YAML specification](https://yaml.org/spec/1.2/spec.html) for more details on YAML syntax.
 
-This section contains metadata about the agent. These metadata fields are **OPTIONAL** except for the agent identifier which is **REQUIRED** and can be used to provide additional context or configuration for the agent.
+This section contains metadata about the agent. These metadata fields are **OPTIONAL** and can be used to provide additional context or configuration for the agent.
 
-| Section             | Description                                                                                   |
-|---------------------|-----------------------------------------------------------------------------------------------|
-| Agent Metadata      | Information about the agent, such as its name, description, version, and author.              |
-| Agent Interface     | Defines how the agent is invoked and its input/output signature.                             |
-| Agent Capabilities  | A list of capabilities (tools, skills, or functions) that the agent can perform.              |
-| Connections         | Defines outbound connections to external tools and peer agents.                              |
+| Section           | Description                                                                      |
+| ----------------- | -------------------------------------------------------------------------------- |
+| [Agent Details](#51-about-the-agent)     | Information about the agent, such as its name, description, version, and author. |
+| [Agent Interface](#52-agent-interface)   | Defines how the agent is invoked and its input/output signature.                 |
+| [Agent Connections](#53-connections) | Defines outbound connections to external tools and peer agents.                  |
+| [Agent Resources](#54-agent-resources)   | Coming soon                                                                      |
 
 Refer to the [AFM Schema](#5-schema-definitions) for a complete list of fields and their meanings.
-
-!!! warning "WIP"
-    Update this section with more detailed explanations of front matter fields as the specification evolves.
 
 
 ### 4.3.  Markdown Body
@@ -89,7 +89,7 @@ Users can use markdown syntax to format the text, including lists, links, and co
 The Markdown body **SHOULD** contain the following headings, with corresponding content
 
  - `# Role`: A brief description of the agent's role.
- - `# Capabilities` **OR** `# Instructions`: A list of the agent's capabilities or instructions.
+ - `# Instructions`: A list of the agent's instructions for system promt
 
 
 ### 4.4. Example
@@ -106,44 +106,19 @@ The Markdown body **SHOULD** contain the following headings, with corresponding 
     authors:
       - "Jane Smith <jane@example.com>"
     license: "MIT"
-    
-    interface:
-      type: function
-      signature:
-        input:
-          - name: user_prompt
-            type: string
-            description: "The student's math question or problem"
-            required: true
-          - name: difficulty_level
-            type: string
-            description: "Beginner, intermediate, or advanced"
-            required: false
-        output:
-          - name: solution
-            type: string
-            description: "Step-by-step solution to the problem"
-          - name: explanation
-            type: string
-            description: "Educational explanation of concepts used"
     ---
 
     # Role
     The Math Tutor is an AI agent designed to assist students with mathematics problems, providing explanations, step-by-step solutions, and practice exercises.
 
-    # Capabilities
-
-    This agent should be able to:
-
-    - Answer questions about mathematical concepts
-    - Solve equations and provide step-by-step solutions
-    - Generate practice problems and quizzes
-    - Provide explanations and tips for solving math problems
-  
-     ## Instructions
+    # Instructions
     - Use clear and concise language when explaining concepts.
     - Provide examples to illustrate complex ideas.
     - Encourage students to think critically and solve problems independently.
+    - Answer questions about mathematical concepts
+    - Solve equations and provide step-by-step solutions
+    - Generate practice problems and quizzes when requested
+    - Provide explanations and tips for solving math problems
     ```
 
 ## 5. Schema Definitions
@@ -152,7 +127,9 @@ This section defines the schema for the Front Matter. For clarity, the schema is
 
 ### 5.1. About the Agent 
 
-This section defines the schema for agent-specific metadata. It is **OPTIONAL** but recommended for clarity and organization, except for the agent identifier which is **REQUIRED**. AFM implementations **SHALL** use this section to display the agent's metadata in user interfaces to provide better user experience for end users.
+This section defines the schema for agent-specific metadata. It is **OPTIONAL** but recommended for clarity and organization.
+
+AFM implementations **SHALL** use this section to display the agent's metadata in user interfaces to provide better user experience for end users.
 
 #### 5.1.1. Schema Overview
 
@@ -184,8 +161,8 @@ Each field serves a specific purpose in defining and organizing the agent:
 | [`description`](#field-description) | `string` | No | Provides a concise summary of what the agent does.<br>Default: inferred from the markdown body `# Role` section.<br>AFM implementations **SHALL** use this field to display the agent's description in user interfaces. |
 | [`version`](#field-version) | `string` | No | [Semantic version](https://semver.org/) of the agent definition (MAJOR.MINOR.PATCH).<br>Default: "0.0.0".<br>AFM implementations **SHALL** use this field to display the agent's version in user interfaces. |
 | [`namespace`](#field-namespace) | `string` | No | Logical grouping category for the agent.<br>Default: "default".<br>AFM implementations **SHALL** use this field to organize agents into logical groups or categories. |
-| [`author`](#field-author) | `string` | No | Single author in format "Name <Email>".<br>Credits the creator of the agent definition. If both `author` and `authors` fields are provided, `authors` takes precedence. |
-| [`authors`](#field-authors) | `string[]` | No | Multiple authors, each in format "Name <Email>".<br>Credits the creators of the agent definition. Takes precedence over `author` if both exist. |
+| [`author`](#field-author) | `string` | No | Single author in format `Name <Email>`.<br>Credits the creator of the agent definition. If both `author` and `authors` fields are provided, `authors` takes precedence. |
+| [`authors`](#field-authors) | `string[]` | No | Multiple authors, each in format `Name <Email>`.<br>Credits the creators of the agent definition. Takes precedence over `author` if both exist. |
 | [`iconUrl`](#field-iconurl) | `string` | No | URL to an icon representing the agent.<br>This is **OPTIONAL** but recommended for visual representation in user interfaces.<br>AFM implementations **SHALL** use this field to display the agent's icon in user interfaces. |
 | [`provider`](#field-provider) | `object` | No | Information about the organization providing the agent.<br>This is **OPTIONAL** but recommended for attribution.<br>See the [Provider Object](#provider-object) below for details. |
 | [`license`](#field-license) | `string` | No | License under which the agent definition is released.<br>This is **OPTIONAL** but recommended for clarity. |
@@ -220,7 +197,13 @@ license: "MIT"
 
 ### 5.2. Agent Interface
 
-This section defines the agent's public "API" or "function signature." It is **REQUIRED** and specifies how the agent receives inputs and produces outputs.
+This section defines the agent's public "API" or "function signature." It is **OPTIONAL** and specifies how the agent receives inputs and produces outputs.
+
+Default values will be used if the interface is not explicitly defined. User can override the default values by specifying the `interface` field in the front matter.
+
+Interface default style is `function` which means the agent is callable within an application. Similarly, signature defaults to one string input parameter called `user_prompt` and one string output parameter called `response`
+
+AFM implementations **SHALL** use this definition to generate the agent's callable interface and to ensure consistent behavior across different platforms. 
 
 #### 5.2.1. Schema Overview
 
@@ -272,9 +255,24 @@ Contains configurations for `service` agents.
 | `http` | `object` | No | Defines how to expose the agent via a standard HTTP endpoint.        |
 | `a2a`  | `object` | No | Defines how the agent is exposed and discovered within an A2A network. See [Section 6.3](#63-agent-card-schema) for Agent Card details. |
 
+!!! warning "WIP"
+    Work in progress: There are more details to be added for `http` and `a2a` exposure configurations. Also there are more other exposure types planned for future versions of AFM.
+
+**<a id="http-object"></a>HTTP Object:**
+
+| Field            | Type     | Required | Description                                                                 |
+|------------------|----------|----------|-----------------------------------------------------------------------------|
+| `path`           | `string` | Yes      | The URL path segment for the agent's HTTP endpoint (e.g., `/math-tutor`). |
+| `authentication` | `object` | No       | Optional authentication configuration for the HTTP endpoint. See [Authentication Object](#authentication-object) for details. |
+
+!!! note "HTTP Object Usage"
+    The `http` object is only applicable for agents of type `service`. It defines how the agent is exposed via a standard HTTP endpoint, allowing other systems to interact with it over the web.
+
+    AFM does not define the HTTP methods (GET, POST, etc.) for the agent's endpoint. This is left to the implementation to decide based on the agent's functionality and requirements.
+
 #### 5.2.3. Example Usage
 
-Here's an example of an agent interface definition:
+Here's an example of a service agent with custom interface and multiple exposure types:
 
 ```yaml
 interface:
@@ -297,6 +295,8 @@ interface:
         type: number
         description: "Confidence score for the response"
   exposure:
+    http:
+      path: "/research-assistant"
     a2a:
       discoverable: true
       agent_card:
@@ -358,13 +358,19 @@ connections:
         endpoint: "https://agents.example.com/research-assistant"
 ```
 
-### 5.4. Agent Capabilities
+### 5.4. Agent Resources
 
-This section defines the schema for agent capabilities - the tools, skills, or functions that the agent can perform.
+This section defines the schema for resources that an agent can access or utilize from the implementation environment. These resources can be models, memory or other data sources that the agent can leverage to perform its tasks.
+
+This section is **OPTIONAL**. 
+
+!!! warning "WIP"
+    Work in progress: The schema for agent resources is still under development. This section will be updated in future versions of the AFM specification.
+
 
 ## 6. Protocol Extensions
 
-This section provides detailed specifications for the protocols referenced in the [Connections section](#53-connections). These protocols enable agents to communicate with external systems and other agents.
+This section provides detailed specifications for the protocols referenced in above schema. These protocols enable agents to communicate with external systems and other agents.
 
 ### 6.1. Model Context Protocol (MCP)
 
@@ -396,32 +402,32 @@ mcp:
 
 **Server Object:**
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `name` | String | Yes | A unique, human-readable identifier for the connection. |
-| `transport` | Object | Yes | An object defining the communication mechanism. See [Transport Object](#transport-object) below. |
-| `authentication` | Object | No | An object declaring the required authentication scheme. See [Authentication Object](#authentication-object) below. |
+| Key              | Type   | Required | Description                                                                                                        |
+| ---------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `name`           | String | Yes      | A unique, human-readable identifier for the connection.                                                            |
+| `transport`      | Object | Yes      | An object defining the communication mechanism. See [Transport Object](#transport-object) below.                   |
+| `authentication` | Object | No       | An object declaring the required authentication scheme. See [Authentication Object](#authentication-object) below. |
 
 **<a id="transport-object"></a>Transport Object:**
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `type` | String | Yes | Transport mechanism, which must be one of:<br>- `http_sse`: Server-Sent Events over HTTP<br>- `stdio`: Standard input/output for local processes<br>- `streamable_http`: HTTP with streaming capabilities |
-| `url` | String | For HTTP types | The URL endpoint of the remote MCP server. |
-| `command` | String | For stdio | The shell command used to start the local MCP server process. |
+| Key       | Type   | Required       | Description                                                                                                                                                                                               |
+| --------- | ------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | String | Yes            | Transport mechanism, which must be one of:<br>- `http_sse`: Server-Sent Events over HTTP<br>- `stdio`: Standard input/output for local processes<br>- `streamable_http`: HTTP with streaming capabilities |
+| `url`     | String | For HTTP types | The URL endpoint of the remote MCP server.                                                                                                                                                                |
+| `command` | String | For stdio      | The shell command used to start the local MCP server process.                                                                                                                                             |
 
 **<a id="authentication-object"></a>Authentication Object:**
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `type` | String | Yes | Authentication scheme (e.g., `oauth2`, `api_key`).<br>The agent's host environment is responsible for managing the actual credentials and authentication flow. |
+| Key    | Type   | Required | Description                                                                                                                                                    |
+| ------ | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type` | String | Yes      | Authentication scheme (e.g., `oauth2`, `api_key`).<br>The agent's host environment is responsible for managing the actual credentials and authentication flow. |
 
 **Tool Filter Object:**
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `allow` | String Array | No | A whitelist of tools to expose, in `server_name/tool_name` format. |
-| `deny` | String Array | No | A blacklist of tools to hide, in `server_name/tool_name` format. |
+| Key     | Type         | Required | Description                                                        |
+| ------- | ------------ | -------- | ------------------------------------------------------------------ |
+| `allow` | String Array | No       | A whitelist of tools to expose, in `server_name/tool_name` format. |
+| `deny`  | String Array | No       | A blacklist of tools to hide, in `server_name/tool_name` format.   |
 
 #### 6.1.3. Example Implementation
 
@@ -452,7 +458,7 @@ connections:
         - "local_filesystem_server/write_file"
 ```
 
-### 6.2. Agent-to-Agent Protocol (A2A)
+### 6.2. Agent-to-Agent (A2A) - Peers
 
 The Agent-to-Agent Protocol (A2A) enables agents to collaborate with other agents, forming a multi-agent system where tasks can be delegated and information can be shared.
 
@@ -475,10 +481,10 @@ connections:
 
 **Peer Object:**
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `name` | String | Yes | A local alias for the peer agent, used to reference it within this agent's logic. |
-| `endpoint` | String | Yes | The network address or URL where the peer agent service is accessible. |
+| Key        | Type   | Required | Description                                                                       |
+| ---------- | ------ | -------- | --------------------------------------------------------------------------------- |
+| `name`     | String | Yes      | A local alias for the peer agent, used to reference it within this agent's logic. |
+| `endpoint` | String | Yes      | The network address or URL where the peer agent service is accessible.            |
 
 #### 6.2.3. Example Implementation
 
@@ -492,7 +498,7 @@ connections:
         endpoint: "https://internal.company.com/agents/data-analyzer"
 ```
 
-### 6.3. Agent Card Schema
+### 6.3. Agent-to-Agent (A2A) - Agent Card
 
 The Agent Card provides metadata for service discovery and display when agents expose themselves as services through the A2A protocol.
 
@@ -534,6 +540,8 @@ This example defines an agent that exposes itself as a discoverable service with
 interface:
   type: service
   exposure:
+    http:
+      path: "/research-assistant"
     a2a:
       discoverable: true
       agent_card:
@@ -541,3 +549,11 @@ interface:
         description: "Expert in finding, analyzing, and summarizing research papers"
         icon: "https://example.com/icons/research-assistant.png"
 ```
+
+## 7. Future Work 
+
+This section outlines potential future enhancements to the AFM specification, including:
+
+- Model configuration for specifying the Large Language Model (LLM) used by the agent.
+- Memory management for agents to store and retrieve information across interactions.
+- Configurable support for Agent declaration. 
