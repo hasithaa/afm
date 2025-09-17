@@ -1,0 +1,64 @@
+{
+  "name": "afm-extension",
+  "displayName": "AFM Agent Language Support",
+  "description": "Rich editing experience for Agent File Markdown (.afm) format",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "afm",
+    "agent",
+    "markdown",
+    "ai"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "afm.editor",
+        "displayName": "AFM Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.afm"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "afm.deployAgent",
+        "title": "🚀 Deploy Agent",
+        "category": "AFM"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4",
+    "@vscode/test-electron": "^2.2.0",
+    "@vscode/vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "yaml": "^2.3.4"
+  }
+}
