@@ -1,19 +1,28 @@
 import * as vscode from 'vscode';
+import { AfmAgentExplorerProvider } from './providers/AfmAgentExplorerProvider';
 import { AfmCustomTextEditorProvider } from './providers/AfmCustomTextEditorProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('AFM Extension is now active!');
 
-    // Register the custom text editor for AFM files
+    // Register Agent Explorer view provider
+    const agentExplorerProvider = new AfmAgentExplorerProvider(context.extensionUri);
     context.subscriptions.push(
-        AfmCustomTextEditorProvider.register(context)
+        vscode.window.registerWebviewViewProvider('afm.agentExplorer', agentExplorerProvider)
     );
 
-    // Register deploy command
+    // Register custom text editor provider for .afm/.afm.md files
     context.subscriptions.push(
-        vscode.commands.registerCommand('afm.deployAgent', () => {
-            vscode.window.showInformationMessage('🚀 Deploy Agent functionality coming soon!');
-        })
+        vscode.window.registerCustomEditorProvider(
+            'afm.agentUiView',
+            new AfmCustomTextEditorProvider(context),
+            {
+                webviewOptions: {
+                    retainContextWhenHidden: true,
+                },
+                supportsMultipleEditorsPerDocument: false,
+            }
+        )
     );
 }
 

@@ -1,8 +1,35 @@
 import * as yaml from 'yaml';
 import { AfmDocument, AfmMetadata } from './types';
 
+// Re-export types for convenience
+export { AfmDocument, AfmMetadata } from './types';
+
 export class AfmParser {
-    public static parseAfmDocument(content: string): AfmDocument {
+    public static isAfmFile(filePath: string): boolean {
+        return filePath.endsWith('.afm') || filePath.endsWith('.afm.md');
+    }
+
+    public static getAfmFileType(filePath: string): 'afm' | 'afm.md' | 'unknown' {
+        if (filePath.endsWith('.afm.md')) {
+            return 'afm.md';
+        } else if (filePath.endsWith('.afm')) {
+            return 'afm';
+        }
+        return 'unknown';
+    }
+
+    public static parseAfmDocument(content: string, filePath?: string): AfmDocument {
+        const fileType = filePath ? this.getAfmFileType(filePath) : 'afm.md'; // Default to .afm.md behavior
+        
+        if (fileType === 'afm') {
+            // .afm files are pure markdown, metadata comes from external source or default
+            return {
+                metadata: {},
+                content: content
+            };
+        }
+        
+        // .afm.md files have YAML frontmatter
         const yamlMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
         
         if (!yamlMatch) {
@@ -29,7 +56,15 @@ export class AfmParser {
         }
     }
 
-    public static serializeAfmDocument(document: AfmDocument): string {
+    public static serializeAfmDocument(document: AfmDocument, filePath?: string): string {
+        const fileType = filePath ? this.getAfmFileType(filePath) : 'afm.md';
+        
+        if (fileType === 'afm') {
+            // .afm files are pure markdown
+            return document.content;
+        }
+        
+        // .afm.md files include YAML frontmatter
         if (!document.metadata || Object.keys(document.metadata).length === 0) {
             return document.content;
         }

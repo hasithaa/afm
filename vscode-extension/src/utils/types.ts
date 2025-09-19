@@ -4,12 +4,13 @@ export interface AfmMetadata {
     version?: string;
     namespace?: string;
     license?: string;
+    author?: string;
     authors?: string[];
     provider?: {
         organization?: string;
         url?: string;
     };
-    icon?: string;
+    iconUrl?: string;
 }
 
 export interface AfmInterface {

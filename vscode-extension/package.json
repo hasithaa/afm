@@ -3,6 +3,7 @@
   "displayName": "AFM Agent Language Support",
   "description": "Rich editing experience for Agent File Markdown (.afm) format",
   "version": "0.1.0",
+  "publisher": "afm-dev",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -16,25 +17,52 @@
     "markdown",
     "ai"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:afm.agentExplorer",
+    "workspaceContains:**/*.afm",
+    "workspaceContains:**/*.afm.md"
+  ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "afm-container",
+          "title": "AFM Agents",
+          "icon": "$(file-code)"
+        }
+      ]
+    },
+    "views": {
+      "afm-container": [
+        {
+          "id": "afm.agentExplorer",
+          "name": "Agent Explorer",
+          "type": "webview",
+          "icon": "$(file-code)"
+        }
+      ]
+    },
     "customEditors": [
       {
-        "viewType": "afm.editor",
-        "displayName": "AFM Editor",
+        "viewType": "afm.agentUiView",
+        "displayName": "AFM Agent View",
         "selector": [
           {
             "filenamePattern": "*.afm"
+          },
+          {
+            "filenamePattern": "*.afm.md"
           }
         ]
       }
     ],
-    "commands": [
+    "languages": [
       {
-        "command": "afm.deployAgent",
-        "title": "🚀 Deploy Agent",
-        "category": "AFM"
+        "id": "afm",
+        "extensions": [".afm", ".afm.md"],
+        "aliases": ["Agent File Markdown", "AFM"],
+        "configuration": "./language-configuration.json"
       }
     ]
   },
