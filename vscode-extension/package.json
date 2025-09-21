@@ -18,12 +18,33 @@
     "ai"
   ],
   "activationEvents": [
+    "onLanguage:afm",
     "onView:afm.agentExplorer",
     "workspaceContains:**/*.afm",
     "workspaceContains:**/*.afm.md"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "AFM Agent",
+      "properties": {
+        "afm.defaultView": {
+          "type": "string",
+          "enum": [
+            "webview",
+            "source",
+            "split"
+          ],
+          "enumDescriptions": [
+            "Open AFM files in the Agent Web View only",
+            "Open AFM files in the text editor only",
+            "Open AFM files in split view (text editor + web view)"
+          ],
+          "default": "webview",
+          "description": "Default view mode for opening AFM files"
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -43,18 +64,77 @@
         }
       ]
     },
-    "customEditors": [
+    "commands": [
       {
-        "viewType": "afm.agentUiView",
-        "displayName": "AFM Agent View",
-        "selector": [
-          {
-            "filenamePattern": "*.afm"
-          },
-          {
-            "filenamePattern": "*.afm.md"
-          }
-        ]
+        "command": "afm.openWithDefaultView",
+        "title": "Open AFM File",
+        "category": "AFM"
+      },
+      {
+        "command": "afm.openWithSplitView",
+        "title": "Open AFM with Split View",
+        "category": "AFM"
+      },
+      {
+        "command": "afm.openInSourceMode",
+        "title": "Open in Source Mode",
+        "category": "AFM"
+      },
+      {
+        "command": "afm.openInWebviewMode",
+        "title": "Open in Agent Web View",
+        "category": "AFM"
+      },
+      {
+        "command": "afm.toggleAgentView",
+        "title": "Toggle Agent View",
+        "category": "AFM",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "afm.closeAgentView",
+        "title": "Close Agent View",
+        "category": "AFM",
+        "icon": "$(close)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "afm.toggleAgentView",
+          "when": "resourceExtname == .afm || (resourceExtname == .md && resourceFilename =~ /\\.afm\\.md$/)",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "afm.openWithDefaultView",
+          "when": "resourceExtname == .afm || resourceExtname == .md && resourcePath =~ /\\.afm\\.md$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "afm.openInWebviewMode",
+          "when": "resourceExtname == .afm || resourceExtname == .md && resourcePath =~ /\\.afm\\.md$/",
+          "group": "navigation@2"
+        },
+        {
+          "command": "afm.openInSourceMode",
+          "when": "resourceExtname == .afm || resourceExtname == .md && resourcePath =~ /\\.afm\\.md$/",
+          "group": "navigation@3"
+        },
+        {
+          "command": "afm.openWithSplitView",
+          "when": "resourceExtname == .afm || resourceExtname == .md && resourcePath =~ /\\.afm\\.md$/",
+          "group": "navigation@4"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "afm.toggleAgentView",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "resourceExtname == .afm || (resourceExtname == .md && resourceFilename =~ /\\.afm\\.md$/)"
       }
     ],
     "languages": [

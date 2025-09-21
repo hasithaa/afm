@@ -1,148 +1,88 @@
-## The AFM Agent Workbench for VS Code**
+# AFM Extension for VS Code - Current Implementation
 
-This document outlines the architecture for a comprehensive Visual Studio Code extension that provides a full suite of tools for discovering, creating, and editing Agent File Markdown (`.afm`) files.
+This document describes the current implementation of the AFM (Agent File Markdown) VS Code extension.
 
-### **1. Executive Summary**
+## Overview
 
-The proposed solution is to build an "AFM Agent Workbench" directly within VS Code. This extension will go beyond simple editing to provide a complete lifecycle management experience for agents. Key features include a dedicated Activity Bar icon, an "Agent Explorer" for discovering agents within a workspace, a wizard for creating new agents, and a powerful **side-by-side editing view**. This dual view will pair the raw power of the native text editor with a structured, graphical "Agent UI View" for managing agent metadata and configuration, offering an experience that is both intuitive for beginners and efficient for expert users.
+The AFM extension provides an intuitive interface for editing `.afm` and `.afm.md` files with three distinct viewing modes and automatic file detection.
 
-### **2. Core User Experience & Usecases**
+## Current Features
 
-The extension will be built around three primary use cases:
+### Three Viewing Modes
 
-#### **Case 1: Creating a New Agent**
+1. **LowCode Mode** (Default)
+   - Form-based interface for editing agent metadata
+   - Visual agent profile with editable fields
+   - Auto-save functionality
+   - Clean, card-based layout
 
-A user can initiate a "Create New Agent" command via the Command Palette or the new AFM Activity. This will launch a webview-based wizard that guides the user through providing initial metadata like `name` and `namespace`. Upon saving, a new `.afm.md` file is created and opened in the main editor view.
+2. **Split View Mode**
+   - Left side: Native VS Code text editor
+   - Right side: LowCode Mode interface
+   - Both sides stay synchronized
+   - Best of both worlds - raw editing + visual interface
 
-#### **Case 2: Listing & Discovering Agents**
+3. **Source Mode**
+   - Standard VS Code text editor
+   - Full markdown and YAML syntax highlighting
+   - Native editing experience
 
-A new AFM icon in the Activity Bar will open the "Agent Explorer" in the primary side panel. This view will scan the current workspace for all `.afm` and `.afm.md` files and display them in a structured list, grouped by namespace. Users can click on any agent in this list to open it.
+### Smart File Opening
 
-#### **Case 3: Opening & Editing an Agent**
+- **Explorer Integration**: Clicking AFM files in Explorer opens in your preferred mode
+- **User Settings**: Configure default view in VS Code settings (`AFM Agent > Default View`)
+- **Automatic Detection**: Extension automatically handles `.afm` and `.afm.md` files
 
-Opening an `.afm.md` file, either from the Agent Explorer or the standard File Explorer, will trigger the extension's primary editing interface: a **side-by-side split view**.
+### Agent Explorer (Activity Bar)
 
-  * **Left Pane:** The standard, native VS Code text editor, showing the raw source of the `.afm.md` file.
-  * **Right Pane:** A custom graphical editor, the **"Agent UI View,"** which provides a structured, profile-like interface for viewing and editing the agent's properties.
+- Dedicated AFM icon in Activity Bar
+- Lists all agents in workspace
+- Organized by namespace
+- Quick access to any agent file
 
-### **3. Key UI Components & Technical Implementation**
+## User Experience
 
-This experience will be built using a combination of VS Code's most powerful extension APIs.
+### Opening AFM Files
+When you click on an AFM file in the file explorer, it opens in your configured default mode:
+- **webview**: Opens directly in LowCode Mode
+- **split**: Opens in Split View (text editor + LowCode Mode)
+- **source**: Opens in standard text editor
 
-#### **3.1. AFM Activity & Agent Explorer**
+### Editing Workflow
+1. **Metadata editing**: Use LowCode Mode for quick form-based editing
+2. **Content editing**: Use text editor for markdown content
+3. **Advanced editing**: Use Split View to see both views simultaneously
 
-  * **API:** `contributes.viewsContainers` and `contributes.views` with a `WebviewViewProvider`.
-  * **Function:** This component will provide the AFM icon in the Activity Bar and the content for the side panel, which lists all agents in the workspace.
+### Commands Available
+- `AFM: Open in Agent Web View` - Force open in LowCode Mode
+- `AFM: Open in Source Mode` - Force open in text editor
+- `AFM: Open with Split View` - Force open in Split View
+- `AFM: Toggle Agent View` - Toggle split view on/off
 
-#### **3.2. Side-by-Side Editor: The Native + Custom Editor Pattern**
+## Technical Implementation
 
-  * **API:** `contributes.customEditors` and the `vscode.CustomTextEditorProvider` API.
-  * **Function:** We will register a **Custom Editor** for `.afm.md` files. When a user opens a file, the custom "Agent UI View" will open. We will ensure the native text editor is also visible in an adjacent pane, with both views kept in sync.
+### Architecture
+- **WebviewProvider**: Handles LowCode Mode interface
+- **SplitViewProvider**: Manages split view layout
+- **Document Events**: Keeps all views synchronized
+- **Configuration**: User preferences for default behavior
 
-### **4. The Agent UI View: A Detailed Breakdown**
+### File Format Support
+- **Pure AFM** (`.afm`): Markdown with inline metadata
+- **AFM with Frontmatter** (`.afm.md`): YAML frontmatter + markdown content
 
-This custom editor view is the graphical interface for the agent. It will be a webview composed of several interactive sections. It implements **two-way data synchronization**: changes in the UI are reflected in the file on save, and changes in the file are reflected in the UI.
+### Metadata Schema
+Supports all standard AFM metadata fields:
+- `name`, `description`, `version`
+- `namespace`, `author`, `authors`
+- `provider`, `iconUrl`, `license`
 
-#### **4.1. Agent Metadata Overview**
+## Current Status: ✅ Fully Implemented
 
-This is the primary section of the view, designed as a profile card for the agent, based on your provided schema.
-
-  * **UI:** A card-based layout showing the agent's icon, name, description, and other key metadata like `namespace`, `version`, `license`, `authors`, and `provider`.
-  * **Interactivity:**
-      * **In-Place Editing:** Users can click on any field to edit its value directly. Changes are staged and applied to the file upon saving.
-      * **Add Optional Fields:** A "+" button allows users to add optional metadata fields from a dropdown list, ensuring they don't have to remember every possible key.
-  * **Data Mapping:** Each field in this UI maps directly to a key in the YAML front matter of the `.afm.md` file.
-
-  Schema Overview
-
-The agent metadata fields are specified in the YAML frontmatter of an AFM file:
-
-```yaml
-# Agent metadata schema
-name: string           # The name of the agent
-description: string    # Brief description of the agent's purpose and functionality
-version: string        # Semantic version (e.g., "1.0.0")
-namespace: string      # Logical grouping category for the agent
-author: string         # Single author in format "Name <Email>"
-authors:               # Takes precedence over author field if both exist
-  - string             # Multiple authors, each in format "Name <Email>"
-provider: object       # Agent provider
-  organization: string # Name of the organization
-  url: string          # URL to the organization's website
-iconUrl: string        # URL to an icon representing the agent
-license: string        # License under which the agent is released
-```
-
-#### Field Definitions {#agent-field-definitions}
-
-Each field serves a specific purpose in defining and organizing the agent:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| [`name`](#field-name) | `string` | No | Identifies the agent in human-readable form.<br>Default: inferred from the filename of the AFM file.<br>AFM implementations **SHALL** use this field to display the agent's name in user interfaces. |
-| [`description`](#field-description) | `string` | No | Provides a concise summary of what the agent does.<br>Default: inferred from the markdown body `# Role` section.<br>AFM implementations **SHALL** use this field to display the agent's description in user interfaces. |
-| [`version`](#field-version) | `string` | No | [Semantic version](https://semver.org/) of the agent definition (MAJOR.MINOR.PATCH).<br>Default: "0.0.0".<br>AFM implementations **SHALL** use this field to display the agent's version in user interfaces. |
-| [`namespace`](#field-namespace) | `string` | No | Logical grouping category for the agent.<br>Default: "default".<br>AFM implementations **SHALL** use this field to organize agents into logical groups or categories. |
-| [`author`](#field-author) | `string` | No | Single author in format `Name <Email>`.<br>Credits the creator of the agent definition. If both `author` and `authors` fields are provided, `authors` takes precedence. |
-| [`authors`](#field-authors) | `string[]` | No | Multiple authors, each in format `Name <Email>`.<br>Credits the creators of the agent definition. Takes precedence over `author` if both exist. |
-| [`iconUrl`](#field-iconurl) | `string` | No | URL to an icon representing the agent.<br>This is **OPTIONAL** but recommended for visual representation in user interfaces.<br>AFM implementations **SHALL** use this field to display the agent's icon in user interfaces. |
-| [`provider`](#field-provider) | `object` | No | Information about the organization providing the agent.<br>This is **OPTIONAL** but recommended for attribution.<br>See the [Provider Object](#provider-object) below for details. |
-| [`license`](#field-license) | `string` | No | License under which the agent definition is released.<br>This is **OPTIONAL** but recommended for clarity. |
-
-**<a id="provider-object"></a>Provider Object:**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| [`provider.organization`](#field-provider-organization) | `string` | No | Name of the organization providing the agent. |
-| [`provider.url`](#field-provider-url) | `string` | No | URL to the organization's website. |
-
-
-#### **4.2. Agent Instruction View**
-
-  * **Function:** This section will display a rendered HTML view of the main Markdown content of the file, representing the agent's core instructions or role. This provides a clean, readable view of the agent's prompt.
-
-#### **4.3. Interface Configuration**
-
-  * **Function:** A structured UI for defining the agent's inputs and outputs. It will include a toggle to switch between `Function` and `Service` types, and interactive tables for adding, editing, and removing input/output parameters.
-
-#### **4.4. Connections**
-
-  * **Function:** A tabbed interface to manage the agent's connections to external services. This will include dedicated UIs for configuring connections to **MCP Servers** and peer agents, with fields for names, endpoints, and other relevant settings.
-
-### **5. `package.json` Manifest Snippet**
-
-```json
-{
-  "name": "afm-extension",
-  "contributes": {
-    "viewsContainers": {
-      "activitybar": [{
-        "id": "afm-container",
-        "title": "AFM Agents",
-        "icon": "media/afm-icon.svg"
-      }]
-    },
-    "views": {
-      "afm-container": [{
-        "id": "afm.agentExplorer",
-        "name": "Agent Explorer",
-        "type": "webview"
-      }]
-    },
-    "customEditors": [
-      {
-        "viewType": "afm.agentUiView",
-        "displayName": "AFM Agent View",
-        "selector": [
-          {
-            "filenamePattern": "*.afm"
-          },
-          {
-            "filenamePattern": "*.afm.md"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
+All core features are working:
+- ✅ Three viewing modes implemented
+- ✅ Smart file opening with user preferences
+- ✅ Agent Explorer in Activity Bar
+- ✅ Synchronized editing across all modes
+- ✅ Auto-save and file watching
+- ✅ Proper error handling and navigation

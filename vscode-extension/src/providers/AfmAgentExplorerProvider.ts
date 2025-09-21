@@ -26,9 +26,15 @@ export class AfmAgentExplorerProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case 'openAgent':
+                    console.log('Opening agent with URI:', data.uri);
                     if (data.uri) {
-                        const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(data.uri));
-                        await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+                        try {
+                            // Use the default view command to respect user settings
+                            await vscode.commands.executeCommand('afm.openWithDefaultView', vscode.Uri.parse(data.uri));
+                        } catch (error) {
+                            console.error('Error opening agent:', error);
+                            vscode.window.showErrorMessage(`Failed to open agent: ${error}`);
+                        }
                     }
                     break;
                 case 'refresh':
@@ -36,6 +42,10 @@ export class AfmAgentExplorerProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'createNewAgent':
                     await this._createNewAgent();
+                    break;
+                case 'webviewReady':
+                    // Webview signals it's ready to receive data
+                    this._refresh();
                     break;
             }
         });
@@ -46,20 +56,37 @@ export class AfmAgentExplorerProvider implements vscode.WebviewViewProvider {
         watcher.onDidDelete(() => this._refresh());
         watcher.onDidChange(() => this._refresh());
 
-        // Initial load
-        this._refresh();
+        webviewView.onDidDispose(() => {
+            watcher.dispose();
+        });
+
+        // Initial load - delay slightly to ensure webview is ready
+        setTimeout(() => {
+            this._refresh();
+        }, 100);
     }
 
     private async _refresh() {
         if (!this._view) {
+            console.log('Cannot refresh - view is not available');
             return;
         }
 
-        const agents = await this._findAfmFiles();
-        this._view.webview.postMessage({
-            type: 'updateAgents',
-            agents: agents
-        });
+        console.log('Refreshing agent explorer...');
+        try {
+            const agents = await this._findAfmFiles();
+            console.log(`Found ${agents.length} namespace groups with agents`);
+            this._view.webview.postMessage({
+                type: 'updateAgents',
+                agents: agents
+            });
+        } catch (error) {
+            console.error('Error refreshing agents:', error);
+            this._view.webview.postMessage({
+                type: 'updateAgents',
+                agents: []
+            });
+        }
     }
 
     private async _findAfmFiles(): Promise<any[]> {
@@ -177,8 +204,8 @@ You are a helpful assistant.
 
         try {
             await vscode.workspace.fs.writeFile(filePath, Buffer.from(template, 'utf8'));
-            const document = await vscode.workspace.openTextDocument(filePath);
-            await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+            // Use the default view command to respect user settings
+            await vscode.commands.executeCommand('afm.openWithDefaultView', filePath);
             this._refresh();
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create agent: ${error}`);
@@ -296,8 +323,8 @@ You are a helpful assistant.
             <div class="header">
                 <div class="title">Agents</div>
                 <div class="actions">
-                    <button class="btn btn-secondary" onclick="refresh()">↻</button>
-                    <button class="btn" onclick="createNew()">+</button>
+                    <button class="btn btn-secondary" id="refreshBtn">↻</button>
+                    <button class="btn" id="createBtn">+</button>
                 </div>
             </div>
             
@@ -307,6 +334,19 @@ You are a helpful assistant.
 
             <script nonce="${nonce}">
                 const vscode = acquireVsCodeApi();
+                
+                // Set up event listeners for buttons
+                document.addEventListener('DOMContentLoaded', () => {
+                    const refreshBtn = document.getElementById('refreshBtn');
+                    const createBtn = document.getElementById('createBtn');
+                    
+                    if (refreshBtn) {
+                        refreshBtn.addEventListener('click', refresh);
+                    }
+                    if (createBtn) {
+                        createBtn.addEventListener('click', createNew);
+                    }
+                });
                 
                 function refresh() {
                     vscode.postMessage({ type: 'refresh' });
@@ -338,7 +378,12 @@ You are a helpful assistant.
                     const content = document.getElementById('content');
                     
                     if (!namespaceGroups || namespaceGroups.length === 0) {
-                        content.innerHTML = '<div class="empty-state">No AFM agents found in workspace.<br><br><button class="btn" onclick="createNew()">Create your first agent</button></div>';
+                        content.innerHTML = '<div class="empty-state">No AFM agents found in workspace.<br><br><button class="btn" id="emptyCreateBtn">Create your first agent</button></div>';
+                        // Add event listener for the empty state button
+                        const emptyCreateBtn = document.getElementById('emptyCreateBtn');
+                        if (emptyCreateBtn) {
+                            emptyCreateBtn.addEventListener('click', createNew);
+                        }
                         return;
                     }
                     
@@ -352,7 +397,7 @@ You are a helpful assistant.
                         
                         for (const agent of group.agents) {
                             html += \`
-                                <div class="agent-item" onclick="openAgent('\${agent.uri}')">
+                                <div class="agent-item" data-uri="\${agent.uri}">
                                     <div class="agent-name">\${escapeHtml(agent.name)}</div>
                                     \${agent.description ? \`<div class="agent-description">\${escapeHtml(agent.description)}</div>\` : ''}
                                     <div class="agent-meta">
@@ -367,6 +412,17 @@ You are a helpful assistant.
                     }
                     
                     content.innerHTML = html;
+                    
+                    // Add event listeners for agent items using event delegation
+                    const agentItems = content.querySelectorAll('.agent-item');
+                    agentItems.forEach(item => {
+                        item.addEventListener('click', () => {
+                            const uri = item.getAttribute('data-uri');
+                            if (uri) {
+                                openAgent(uri);
+                            }
+                        });
+                    });
                 }
                 
                 function escapeHtml(unsafe) {
@@ -377,6 +433,11 @@ You are a helpful assistant.
                         .replace(/"/g, "&quot;")
                         .replace(/'/g, "&#039;");
                 }
+                
+                // Signal that webview is ready
+                window.addEventListener('load', () => {
+                    vscode.postMessage({ type: 'webviewReady' });
+                });
             </script>
         </body>
         </html>`;

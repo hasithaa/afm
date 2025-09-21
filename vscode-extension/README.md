@@ -1,94 +1,123 @@
-# AFM VS Code Extension
+# AFM Extension for VS Code
 
-A Visual Studio Code extension that provides rich editing support for Agent File Markdown (`.afm`) format files using a **Custom Text Editor** approach.
+A comprehensive VS Code extension for editing Agent File Markdown (.afm) files with multiple viewing modes and intelligent file handling.
 
-## ✨ **Features**
+## ✨ Features
 
-### 🎯 **Custom Text Editor Implementation**
-- **File as single source of truth** - AFM file on disk is the authority
-- **Automatic YAML stripping** - Shows only Markdown content for editing
-- **Integrated metadata panel** - Side-by-side YAML metadata editing
-- **Real-time synchronization** - Changes automatically merge back to file
-- **No popups or prompts** - Seamless editing experience
+- **�️ Three Viewing Modes**: Choose how you want to edit AFM files
+  - **LowCode Mode**: Form-based visual editor (default)
+  - **Split View**: Text editor + visual editor side-by-side
+  - **Source Mode**: Standard text editor only
 
-### 🏗️ **Architecture**
+- **🎯 Smart File Opening**: AFM files automatically open in your preferred mode
+- **📁 Agent Explorer**: Dedicated sidebar to browse all agents in your workspace
+- **✏️ Live Editing**: All modes stay synchronized - edit in any view
+- **⚙️ User Settings**: Configure your preferred default view mode
+- **🏷️ Format Support**: Both `.afm` and `.afm.md` file formats
 
-#### **Custom Text Editor (`AfmCustomTextEditorProvider`)**
-- Automatically opens for `.afm` files
-- **Left panel**: Native Markdown editing (YAML frontmatter hidden)
-- **Right panel**: Form-based metadata editing (name, description, version, etc.)
-- **Automatic save/load**: Handles YAML parsing and serialization
-- **Two-way sync**: Changes in either panel update the underlying file
+## 🚀 Quick Start
 
-## 🚀 **Installation & Usage**
-
-1. **Setup:**
+1. **Install the extension**:
    ```bash
-   cd vscode-extension
-   ./setup.sh
+   ./install.sh
    ```
 
-2. **Development:**
-   ```bash
-   npm run watch    # Watch mode
-   code .           # Open in VS Code
-   # Press F5 to launch extension development host
-   ```
+2. **Open any AFM file** - it opens in LowCode Mode by default
 
-3. **Testing:**
-   - Open any `.afm` file in the development host
-   - **Custom editor automatically opens** with:
-     - Left side: Markdown content only
-     - Right side: Metadata editing form
-   - Edit either side and changes sync to the file
+3. **Change your preferred mode** in VS Code settings:
+   - Go to Settings → Extensions → AFM Agent
+   - Set "Default View" to: `webview`, `split`, or `source`
 
-## 📁 **Clean Project Structure**
+4. **Use the Agent Explorer**:
+   - Click the AFM icon in the Activity Bar
+   - Browse all agents in your workspace
 
+## 📖 How to Use
+
+### LowCode Mode (Visual Editor)
+- Click on any metadata field to edit
+- Changes auto-save after 1 second
+- Clean card-based interface
+- Perfect for quick metadata updates
+
+### Split View Mode
+- Left: Native text editor for raw editing
+- Right: Visual editor for metadata
+- Both sides stay synchronized
+- Best for detailed editing
+
+### Source Mode
+- Standard VS Code markdown editor
+- Full syntax highlighting
+- Traditional editing experience
+
+### Available Commands
+- `AFM: Open in Agent Web View` - Open in visual mode
+- `AFM: Open in Source Mode` - Open in text editor
+- `AFM: Open with Split View` - Open in split mode
+- `AFM: Toggle Agent View` - Toggle split view
+
+## ⚙️ Settings
+
+Configure the extension in VS Code settings:
+
+- **AFM Agent > Default View**: Choose `webview`, `split`, or `source`
+  - `webview`: Opens AFM files in visual editor
+  - `split`: Opens in split view (text + visual)
+  - `source`: Opens in standard text editor
+
+## 🐛 Troubleshooting
+
+### Files Don't Open in Preferred Mode
+
+**Solution**: Check your settings:
+1. Go to Settings → Extensions → AFM Agent
+2. Verify "Default View" is set correctly
+3. Restart VS Code if needed
+
+### Visual Editor Doesn't Load
+
+**Solutions**:
+1. Run command: `AFM: Open in Agent Web View`
+2. Check file extension is `.afm` or `.afm.md`
+3. Reload window: `Cmd+Shift+P` → "Developer: Reload Window"
+
+### Settings Change Doesn't Work
+
+**Solution**: 
+1. Close all AFM file tabs
+2. Reopen the AFM file to see the new default mode
+3. Or use the specific commands to force a particular mode
+
+## 📋 File Format Support
+
+### Pure AFM Files (`.afm`)
+```markdown
+# Agent Name
+
+Agent instructions and content...
 ```
-src/
-├── extension.ts                        # Main activation logic
-├── providers/
-│   └── AfmCustomTextEditorProvider.ts  # Custom text editor implementation
-└── utils/
-    ├── types.ts                        # Type definitions
-    └── parser.ts                       # AFM parsing utilities
 
-syntaxes/
-└── afm.tmLanguage.json                 # Language grammar
+### AFM with Frontmatter (`.afm.md`)
+```yaml
+---
+name: "My Agent"
+description: "A helpful agent"
+version: "1.0.0"
+namespace: "default"
+---
 
-language-configuration.json             # Language configuration
-package.json                            # Extension manifest
+# Agent Instructions
+
+Agent content...
 ```
 
-## 🎯 **Key Benefits**
+## 🔧 Development Status
 
-✅ **Simple & Clean**: No complex virtual documents or syncing  
-✅ **File-based**: Single source of truth approach  
-✅ **Native Experience**: Real text editing with form-based metadata  
-✅ **Automatic**: No user intervention needed  
-✅ **Integrated**: Side-by-side editing interface  
-
-## 🔧 **How It Works**
-
-1. **Opening AFM file**: Custom editor automatically replaces default text editor
-2. **Loading**: AFM file is parsed, YAML extracted, Markdown shown in left panel
-3. **Editing**: Both panels allow editing with real-time synchronization
-4. **Saving**: YAML metadata + Markdown content automatically merged back to file
-
-## � **Development Commands**
-
-- `npm run compile` - Compile TypeScript
-- `npm run watch` - Watch mode for development  
-- `npm run lint` - Run ESLint
-- `npm run package` - Package the extension
-
-## 🎪 **Usage Example**
-
-When you open `sample.afm`:
-- **Before**: See YAML frontmatter + Markdown content
-- **With Extension**: 
-  - Left panel shows only Markdown content for clean editing
-  - Right panel shows form fields for metadata (name, description, version, etc.)
-  - Changes in either panel automatically save to the `.afm` file
-
-This implementation perfectly realizes the "file as single source of truth" approach with automatic YAML handling!
+✅ **Fully Implemented**
+- All three viewing modes working
+- Smart file opening with user preferences  
+- Agent Explorer in Activity Bar
+- Live synchronization between all views
+- Auto-save functionality
+- Proper error handling
