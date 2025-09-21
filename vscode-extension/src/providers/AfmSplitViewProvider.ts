@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AfmParser, AfmDocument } from '../utils/parser';
-import { AfmLowCodeHtmlGenerator } from '../utils/lowCodeHtmlGenerator';
+import { AfmLowCodeHtmlGenerator } from '../lowcode';
 
 export class AfmSplitViewProvider {
     private static sharedPanel: vscode.WebviewPanel | undefined;
