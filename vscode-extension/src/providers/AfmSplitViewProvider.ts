@@ -5,6 +5,8 @@ import { AfmLowCodeHtmlGenerator } from '../lowcode';
 export class AfmSplitViewProvider {
     private static sharedPanel: vscode.WebviewPanel | undefined;
     private static currentUri: vscode.Uri | undefined;
+    private static updateTimeout: NodeJS.Timeout | undefined;
+    private static isUpdatingDocument: boolean = false;
 
     public static hasPanel(): boolean {
         return this.sharedPanel !== undefined;
@@ -116,17 +118,36 @@ export class AfmSplitViewProvider {
             this.sharedPanel.webview.onDidReceiveMessage(async (message) => {
                 switch (message.type) {
                     case 'updateMetadata':
-                        await this.updateMetadata(document, message.metadata);
+                        await AfmSplitViewProvider.updateMetadata(document, message.metadata, message.field);
+                        if (message.refreshWebview && this.sharedPanel) {
+                            // Refresh the webview content after successful save
+                            await AfmSplitViewProvider.updateWebviewContent(this.sharedPanel, document);
+                            await AfmSplitViewProvider.sendDocumentToWebview(this.sharedPanel, document);
+                        }
+                        break;
+                    case 'updateContent':
+                        await AfmSplitViewProvider.updateContent(document, message.content);
+                        if (message.refreshWebview && this.sharedPanel) {
+                            // Refresh the webview content after successful save
+                            await AfmSplitViewProvider.updateWebviewContent(this.sharedPanel, document);
+                            await AfmSplitViewProvider.sendDocumentToWebview(this.sharedPanel, document);
+                        }
                         break;
                     case 'openInEditor':
                         await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+                        break;
+                    case 'webviewReady':
+                        // Send initial document data to webview
+                        if (this.sharedPanel) {
+                            await AfmSplitViewProvider.sendDocumentToWebview(this.sharedPanel, document);
+                        }
                         break;
                 }
             });
 
             // Watch for document changes to update webview
             const disposable = vscode.workspace.onDidChangeTextDocument(async (e) => {
-                if (this.currentUri && e.document.uri.toString() === this.currentUri.toString()) {
+                if (this.currentUri && e.document.uri.toString() === this.currentUri.toString() && !this.isUpdatingDocument) {
                     if (this.sharedPanel) {
                         await this.updateWebviewContent(this.sharedPanel, e.document);
                     }
@@ -156,25 +177,199 @@ export class AfmSplitViewProvider {
         panel.webview.html = AfmLowCodeHtmlGenerator.generateHtml(panel.webview, afmDoc, document.uri, false); // false = editable
     }
 
-    private static async updateMetadata(document: vscode.TextDocument, newMetadata: any) {
-        const currentContent = document.getText();
-        const afmDoc = AfmParser.parseAfmDocument(currentContent);
-        
-        const updatedDoc: AfmDocument = {
-            ...afmDoc,
-            metadata: newMetadata
-        };
+    private static async sendDocumentToWebview(panel: vscode.WebviewPanel, document: vscode.TextDocument): Promise<void> {
+        if (!panel) {
+            return;
+        }
 
-        const newContent = AfmParser.serializeAfmDocument(updatedDoc);
-        
-        const edit = new vscode.WorkspaceEdit();
-        edit.replace(
-            document.uri,
-            new vscode.Range(0, 0, document.lineCount, 0),
-            newContent
-        );
-        
-        await vscode.workspace.applyEdit(edit);
+        try {
+            const content = document.getText();
+            const afmDoc = AfmParser.parseAfmDocument(content);
+            
+            await panel.webview.postMessage({
+                type: 'documentUpdated',
+                content: afmDoc
+            });
+        } catch (error) {
+            console.error('Error sending document to webview:', error);
+        }
+    }
+
+    private static async updateMetadata(document: vscode.TextDocument, newMetadata: any, specificField?: string) {
+        try {
+            // Set flag to prevent recursive updates
+            this.isUpdatingDocument = true;
+            
+            // Log the update for debugging
+            if (specificField) {
+                console.log(`Updating specific field in split view: ${specificField}`, newMetadata);
+            } else {
+                console.log('Updating metadata in split view:', newMetadata);
+            }
+            
+            // Get the latest document to avoid version conflicts
+            const latestDocument = await vscode.workspace.openTextDocument(document.uri);
+            const currentContent = latestDocument.getText();
+            const afmDoc = AfmParser.parseAfmDocument(currentContent);
+            
+            // Merge new metadata with existing metadata
+            const mergedMetadata = {
+                ...afmDoc.metadata,
+                ...newMetadata
+            };
+            
+            // Only update if metadata actually changed
+            const metadataChanged = JSON.stringify(afmDoc.metadata) !== JSON.stringify(mergedMetadata);
+            if (!metadataChanged) {
+                console.log('No metadata changes detected in split view, skipping update');
+                return; // No changes to apply
+            }
+            
+            const updatedDoc: AfmDocument = {
+                ...afmDoc,
+                metadata: mergedMetadata
+            };
+
+            const newContent = AfmParser.serializeAfmDocument(updatedDoc);
+            
+            // Try using TextEditor approach instead of WorkspaceEdit
+            const editors = vscode.window.visibleTextEditors.filter(editor => 
+                editor.document.uri.toString() === document.uri.toString()
+            );
+            
+            if (editors.length > 0) {
+                // Use the active text editor to avoid version conflicts
+                const editor = editors[0];
+                const fullRange = new vscode.Range(
+                    editor.document.positionAt(0),
+                    editor.document.positionAt(editor.document.getText().length)
+                );
+                
+                const success = await editor.edit(editBuilder => {
+                    editBuilder.replace(fullRange, newContent);
+                });
+                
+                if (!success) {
+                    throw new Error('Failed to apply edit using TextEditor');
+                }
+            } else {
+                // Fallback to WorkspaceEdit if no editor is open
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                    latestDocument.uri,
+                    new vscode.Range(0, 0, latestDocument.lineCount, 0),
+                    newContent
+                );
+                
+                const success = await vscode.workspace.applyEdit(edit);
+                if (!success) {
+                    throw new Error('Failed to apply WorkspaceEdit');
+                }
+            }
+            
+            const successMessage = specificField ? 
+                `Successfully saved ${specificField} in split view` : 
+                'Metadata updated successfully in split view';
+            console.log(successMessage);
+            
+            // Show a brief success message for field-specific saves
+            if (specificField) {
+                vscode.window.showInformationMessage(
+                    `✅ ${specificField.charAt(0).toUpperCase() + specificField.slice(1)} saved successfully`,
+                    { modal: false }
+                );
+            }
+        } catch (error) {
+            console.error('Error updating metadata in split view:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorContext = specificField ? ` for field ${specificField}` : '';
+            vscode.window.showErrorMessage(`Failed to save metadata${errorContext}: ${errorMessage}`);
+        } finally {
+            // Reset flag after a short delay to allow the update to propagate
+            setTimeout(() => {
+                this.isUpdatingDocument = false;
+            }, 500);
+        }
+    }
+
+    private static async updateContent(document: vscode.TextDocument, newContent: string) {
+        try {
+            // Set flag to prevent recursive updates
+            this.isUpdatingDocument = true;
+            
+            console.log('Updating content in split view');
+            
+            // Get the latest document to avoid version conflicts
+            const latestDocument = await vscode.workspace.openTextDocument(document.uri);
+            const currentContent = latestDocument.getText();
+            const afmDoc = AfmParser.parseAfmDocument(currentContent);
+            
+            // Only update if content actually changed
+            const contentChanged = afmDoc.content !== newContent;
+            if (!contentChanged) {
+                console.log('No content changes detected in split view, skipping update');
+                return; // No changes to apply
+            }
+            
+            const updatedDoc: AfmDocument = {
+                ...afmDoc,
+                content: newContent
+            };
+
+            const serializedContent = AfmParser.serializeAfmDocument(updatedDoc);
+            
+            // Try using TextEditor approach instead of WorkspaceEdit
+            const editors = vscode.window.visibleTextEditors.filter(editor => 
+                editor.document.uri.toString() === document.uri.toString()
+            );
+            
+            if (editors.length > 0) {
+                // Use the active text editor to avoid version conflicts
+                const editor = editors[0];
+                const fullRange = new vscode.Range(
+                    editor.document.positionAt(0),
+                    editor.document.positionAt(editor.document.getText().length)
+                );
+                
+                const success = await editor.edit(editBuilder => {
+                    editBuilder.replace(fullRange, serializedContent);
+                });
+                
+                if (!success) {
+                    throw new Error('Failed to apply content edit using TextEditor');
+                }
+            } else {
+                // Fallback to WorkspaceEdit if no editor is open
+                const edit = new vscode.WorkspaceEdit();
+                edit.replace(
+                    latestDocument.uri,
+                    new vscode.Range(0, 0, latestDocument.lineCount, 0),
+                    serializedContent
+                );
+                
+                const success = await vscode.workspace.applyEdit(edit);
+                if (!success) {
+                    throw new Error('Failed to apply content WorkspaceEdit');
+                }
+            }
+            
+            console.log('Content updated successfully in split view');
+            
+            // Show a brief success message
+            vscode.window.showInformationMessage(
+                '✅ Content saved successfully',
+                { modal: false }
+            );
+        } catch (error) {
+            console.error('Error updating content in split view:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(`Failed to save content: ${errorMessage}`);
+        } finally {
+            // Reset flag after a short delay to allow the update to propagate
+            setTimeout(() => {
+                this.isUpdatingDocument = false;
+            }, 500);
+        }
     }
 }
 

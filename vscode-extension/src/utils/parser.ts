@@ -1,4 +1,4 @@
-import * as yaml from 'yaml';
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { AfmDocument, AfmMetadata } from './types';
 
 // Re-export types for convenience
@@ -18,41 +18,30 @@ export class AfmParser {
         return 'unknown';
     }
 
-    public static parseAfmDocument(content: string, filePath?: string): AfmDocument {
-        const fileType = filePath ? this.getAfmFileType(filePath) : 'afm.md'; // Default to .afm.md behavior
-        
-        if (fileType === 'afm') {
-            // .afm files are pure markdown, metadata comes from external source or default
-            return {
-                metadata: {},
-                content: content
-            };
-        }
-        
-        // .afm.md files have YAML frontmatter
-        const yamlMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-        
-        if (!yamlMatch) {
-            return {
-                metadata: {},
-                content: content
-            };
-        }
-
+    static parseAfmDocument(content: string): { metadata: AfmDocument['metadata']; content: string } {
         try {
-            const metadata = yaml.parse(yamlMatch[1]) as AfmMetadata;
-            const markdownContent = yamlMatch[2];
+            console.log('AfmParser.parseAfmDocument: Starting parse of content:', content.substring(0, 200) + '...');
             
-            return {
-                metadata,
-                content: markdownContent
-            };
+            if (content.startsWith('---')) {
+                const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+                if (frontMatterMatch) {
+                    const yamlContent = frontMatterMatch[1];
+                    const markdownContent = frontMatterMatch[2];
+                    console.log('AfmParser.parseAfmDocument: Found YAML content:', yamlContent);
+                    
+                    const metadata = yamlParse(yamlContent) as AfmDocument['metadata'];
+                    console.log('AfmParser.parseAfmDocument: Parsed metadata:', JSON.stringify(metadata, null, 2));
+                    
+                    return { metadata: metadata || {}, content: markdownContent };
+                }
+            }
+            
+            // No front matter found
+            console.log('AfmParser.parseAfmDocument: No front matter found, returning empty metadata');
+            return { metadata: {}, content: content };
         } catch (error) {
-            console.error('Error parsing YAML frontmatter:', error);
-            return {
-                metadata: {},
-                content: content
-            };
+            console.error('Error parsing AFM document:', error);
+            return { metadata: {}, content: content };
         }
     }
 
@@ -69,7 +58,21 @@ export class AfmParser {
             return document.content;
         }
 
-        const yamlContent = yaml.stringify(document.metadata);
+        // Filter out empty string values for cleaner YAML
+        const filteredMetadata: Partial<AfmMetadata> = {};
+        (Object.keys(document.metadata) as (keyof AfmMetadata)[]).forEach(key => {
+            const value = document.metadata[key];
+            if (value !== null && value !== undefined && value !== '') {
+                (filteredMetadata as any)[key] = value;
+            }
+        });
+
+        // If no non-empty metadata, return just content
+        if (Object.keys(filteredMetadata).length === 0) {
+            return document.content;
+        }
+
+        const yamlContent = yamlStringify(filteredMetadata);
         return `---\n${yamlContent}---\n${document.content}`;
     }
 
