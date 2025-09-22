@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { AfmParser, AfmDocument } from '../utils/parser';
 import { AfmLowCodeHtmlGenerator } from '../lowcode';
+import { PythonCodeGenerator } from '../utils/PythonCodeGenerator';
+import { BallerinaCodeGenerator } from '../utils/BallerinaCodeGenerator';
 
 export class AfmWebviewProvider {
     private static sharedPanel: vscode.WebviewPanel | undefined;
@@ -79,6 +82,9 @@ export class AfmWebviewProvider {
                     case 'webviewReady':
                         // Send initial document data to webview
                         await this.sendDocumentToWebview(document);
+                        break;
+                    case 'runAgent':
+                        await this.handleRunAgent(document, message.language || 'python3');
                         break;
                 }
             });
@@ -356,5 +362,131 @@ export class AfmWebviewProvider {
     </div>
 </body>
 </html>`;
+    }
+
+    /**
+     * Handle run agent command
+     */
+    private static async handleRunAgent(document: vscode.TextDocument, language: string = 'python3'): Promise<void> {
+        try {
+            console.log(`Running agent for document: ${document.uri.fsPath} in language: ${language}`);
+            
+            // Parse the AFM document to get agent info
+            const content = document.getText();
+            const afmDoc = AfmParser.parseAfmDocument(content);
+            
+            // Get workspace root
+            const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+            if (!workspaceFolder) {
+                vscode.window.showErrorMessage('No workspace folder found. Please open a workspace.');
+                return;
+            }
+            
+            // Get the agent ID (same logic as in code generators)
+            const namespace = afmDoc.metadata?.namespace || 'default';
+            const name = afmDoc.metadata?.name || 'agent';
+            const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const cleanNamespace = namespace.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const agentId = `${cleanNamespace}_${cleanName}`;
+            
+            // Determine target directory and main file based on language
+            let targetDir: string;
+            let mainFile: string;
+            let checkCommand: string;
+            let installCommand: string;
+            let runCommand: string;
+            
+            if (language === 'ballerina') {
+                targetDir = `${workspaceFolder.uri.fsPath}/target/${agentId}/ballerina`;
+                mainFile = `${targetDir}/main.bal`;
+                checkCommand = 'bal version';
+                installCommand = 'echo "Ballerina dependencies managed by build"';
+                runCommand = ''; // Will be set dynamically with user input
+            } else {
+                // Default to python3
+                targetDir = `${workspaceFolder.uri.fsPath}/target/${agentId}/python3`;
+                mainFile = `${targetDir}/main.py`;
+                checkCommand = 'python3 -c "from openai import OpenAI; import toml" 2>/dev/null || echo "Installing requirements..."';
+                installCommand = 'python3 -c "from openai import OpenAI; import toml" 2>/dev/null || pip3 install -r requirements.txt';
+                runCommand = ''; // Will be set dynamically with user input
+            }
+            
+            // Always regenerate the code (delete and recreate)
+            const languageDisplayName = language === 'ballerina' ? 'Ballerina' : 'Python';
+            
+            // Delete existing directory if it exists
+            try {
+                await vscode.workspace.fs.delete(vscode.Uri.file(targetDir), { recursive: true });
+                console.log(`Deleted existing ${languageDisplayName} agent directory: ${targetDir}`);
+            } catch {
+                // Directory doesn't exist, which is fine
+                console.log(`No existing ${languageDisplayName} agent directory to delete`);
+            }
+            
+            // Generate fresh code
+            if (language === 'ballerina') {
+                await BallerinaCodeGenerator.generateBallerinaAgent(afmDoc, workspaceFolder.uri.fsPath, document.uri);
+            } else {
+                await PythonCodeGenerator.generatePythonAgent(afmDoc, workspaceFolder.uri.fsPath, document.uri);
+            }
+            
+            console.log(`Generated fresh ${languageDisplayName} agent code in: ${targetDir}`);
+            
+            // Get user input before creating terminal
+            let finalMessage: string;
+            
+            if (language !== 'ballerina') {
+                // Prompt for user message and run the agent (Python behavior)
+                const userMessage = await vscode.window.showInputBox({
+                    prompt: `Enter your message for the ${afmDoc.metadata?.name || 'AFM Agent'}`,
+                    placeHolder: 'What would you like to ask the agent?',
+                    value: 'Hello! What can you help me with?'
+                });
+                
+                // Use provided message or default if cancelled/empty
+                finalMessage = (userMessage && userMessage.trim()) ? userMessage.trim() : 'Hello! What can you help me with?';
+            } else {
+                // Prompt for user message for Ballerina too
+                const userMessage = await vscode.window.showInputBox({
+                    prompt: `Enter your message for the ${afmDoc.metadata?.name || 'AFM Agent'}`,
+                    placeHolder: 'What would you like to ask the agent?',
+                    value: 'Hello! What can you help me with?'
+                });
+                
+                // Use provided message or default if cancelled/empty
+                finalMessage = (userMessage && userMessage.trim()) ? userMessage.trim() : 'Hello! What can you help me with?';
+            }
+            
+            // Open a terminal and run the agent
+            const terminal = vscode.window.createTerminal({
+                name: `AFM Agent (${languageDisplayName}): ${afmDoc.metadata?.name || 'Agent'}`,
+                cwd: targetDir
+            });
+            
+            terminal.show();
+            
+            // Check dependencies and API key
+            terminal.sendText(checkCommand);
+            
+            if (language !== 'ballerina') {
+                terminal.sendText(installCommand);
+                terminal.sendText('if [ -z "$OPENAI_API_KEY" ]; then echo "⚠️  Warning: OPENAI_API_KEY environment variable is not set"; fi');
+                
+                // Run with the message we got earlier
+                const escapedMessage = finalMessage.replace(/"/g, '\\"').replace(/'/g, "\\'");
+                terminal.sendText(`python3 main.py "${escapedMessage}"`);
+            } else {
+                // For Ballerina, check if API key is set in Config.toml or environment
+                terminal.sendText('if [ -z "$OPENAI_API_KEY" ] && ! grep -q "openai_api_key" Config.toml 2>/dev/null; then echo "⚠️  Warning: OPENAI_API_KEY not set in environment or Config.toml"; fi');
+                
+                // Run with the message we got earlier
+                const escapedMessage = finalMessage.replace(/"/g, '\\"');
+                terminal.sendText(`bal run -- "${escapedMessage}"`);
+            }
+            
+        } catch (error) {
+            console.error('Error running agent:', error);
+            vscode.window.showErrorMessage(`Failed to run agent: ${error}`);
+        }
     }
 }

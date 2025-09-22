@@ -71,7 +71,6 @@ export class AgentCardComponent implements StyledComponent, ScriptedComponent {
                     </div>
                 </div>
 
-                <!-- Edit Mode -->
                 <div id="metadata-edit" class="metadata-edit" style="display: none;">
                     <div class="edit-form">
                         <div class="form-row">
@@ -143,6 +142,7 @@ export class AgentCardComponent implements StyledComponent, ScriptedComponent {
                 cursor: pointer;
                 font-size: 12px;
                 transition: background-color 0.2s;
+                margin-left: 8px;
             }
             
             .edit-metadata-btn:hover,
@@ -226,7 +226,6 @@ export class AgentCardComponent implements StyledComponent, ScriptedComponent {
                 word-break: break-word;
             }
             
-            /* Edit Mode Styles */
             .metadata-edit {
                 background-color: var(--vscode-input-background);
                 border: 1px solid var(--vscode-input-border);

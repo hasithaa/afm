@@ -5,10 +5,44 @@ export class BaseScripts {
     
     public static getBaseScripts(): string {
         return `
+            // Acquire VS Code API and make it globally available
             const vscode = acquireVsCodeApi();
+            window.vscode = vscode;
             
             function openInEditor() {
                 vscode.postMessage({ type: 'openInEditor' });
+            }
+            
+            // Dropdown handling
+            function toggleRunDropdown() {
+                const dropdown = document.querySelector('.dropdown');
+                dropdown.classList.toggle('open');
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('open');
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }
+            
+            // Run agent with specified language
+            function runAgent(language) {
+                console.log('Running agent with language:', language);
+                
+                // Close dropdown
+                const dropdown = document.querySelector('.dropdown');
+                dropdown.classList.remove('open');
+                
+                if (window.vscode) {
+                    window.vscode.postMessage({
+                        type: 'runAgent',
+                        language: language
+                    });
+                } else {
+                    console.error('VS Code API not available');
+                }
             }
             
             // Updated metadata function for contenteditable fields

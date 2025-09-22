@@ -28,7 +28,6 @@ export class ContentPreviewComponent implements StyledComponent, ScriptedCompone
                     <div id="markdown-preview" class="markdown-preview"></div>
                 </div>
                 
-                <!-- Edit Mode (initially hidden) -->
                 <div id="content-edit-container" class="content-edit-container" style="display: none;">
                     <textarea 
                         id="content-editor" 
