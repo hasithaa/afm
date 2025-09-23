@@ -21,8 +21,7 @@ export class HeaderComponent implements StyledComponent, ScriptedComponent {
                             ▶️ Run <span class="dropdown-arrow">▼</span>
                         </button>
                         <div class="dropdown-content" id="runDropdownContent">
-                            <a href="#" id="runPythonBtn" ${disabledAttr}>🐍 Run Python</a>
-                            <a href="#" id="runBallerinaBtn" ${disabledAttr}>🔵 Run Ballerina</a>
+                            <a href="#" id="runBallerinaBtn" ${disabledAttr}>▶️ Run Ballerina</a>
                         </div>
                     </div>
                 </div>
@@ -143,25 +142,6 @@ export class HeaderComponent implements StyledComponent, ScriptedComponent {
                         setTimeout(() => {
                             document.addEventListener('click', closeDropdown);
                         }, 0);
-                    });
-                }
-
-                // Python run button
-                const runPythonBtn = document.getElementById('runPythonBtn');
-                if (runPythonBtn) {
-                    runPythonBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const runDropdown = document.getElementById('runDropdown');
-                        if (runDropdown) {
-                            runDropdown.classList.remove('open');
-                        }
-                        
-                        if (window.vscode) {
-                            window.vscode.postMessage({
-                                type: 'runAgent',
-                                language: 'python3'
-                            });
-                        }
                     });
                 }
 

@@ -3,9 +3,8 @@ import { LowCodeUtils } from './utils';
 import { BaseStyles } from './styles/BaseStyles';
 import { BaseScripts } from './scripts/BaseScripts';
 import { HeaderComponent } from './components/HeaderComponent';
-import { AgentCardComponent } from './components/AgentCardComponent';
-import { MetadataEditorComponent } from './components/MetadataEditorComponent';
 import { ContentPreviewComponent } from './components/ContentPreviewComponent';
+import { AgentFormComponent } from './components/AgentFormComponent';
 
 /**
  * Main page builder for LowCode mode
@@ -15,11 +14,10 @@ export class LowCodePageBuilder {
     private components: (StyledComponent & Partial<ScriptedComponent>)[] = [];
     
     constructor() {
-        // Register all components in order
+        // Register core components that are always present
         this.components = [
             new HeaderComponent(),
-            new AgentCardComponent(),
-            new MetadataEditorComponent(),
+            new AgentFormComponent(),
             new ContentPreviewComponent()
         ];
     }

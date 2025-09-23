@@ -247,7 +247,7 @@ export class ContentPreviewComponent implements StyledComponent, ScriptedCompone
                 // Basic markdown parsing
                 let html = text
                     // Code blocks (must be before inline code)
-                    .replace(/\`\`\`([\\s\\S]*?)\`\`\`/gim, '<pre><code>$1</code></pre>')
+                    .replace(/\\\`\\\`\\\`([\\s\\S]*?)\\\`\\\`\\\`/gim, '<pre><code>$1</code></pre>')
                     // Headers (largest to smallest)
                     .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
                     .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -258,7 +258,7 @@ export class ContentPreviewComponent implements StyledComponent, ScriptedCompone
                     // Italic
                     .replace(/\\*(.*?)\\*/gim, '<em>$1</em>')
                     // Inline code
-                    .replace(/\`(.*?)\`/gim, '<code>$1</code>')
+                    .replace(/\\\`(.*?)\\\`/gim, '<code>$1</code>')
                     // Links
                     .replace(/\\[([^\\]]+)\\]\\(([^\\)]+)\\)/gim, '<a href="$2">$1</a>')
                     // Blockquotes

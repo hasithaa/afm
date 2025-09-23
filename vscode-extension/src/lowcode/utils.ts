@@ -18,15 +18,41 @@ export class LowCodeUtils {
     }
 
     /**
-     * Escape HTML characters to prevent XSS
+     * Escape HTML characters to prevent XSS and template literal issues
      */
     public static escapeHtml(text: string): string {
+        if (!text) return '';
+        // Convert non-string values to string safely
+        if (typeof text !== 'string') {
+            try {
+                text = String(text);
+            } catch (error) {
+                console.warn('Failed to convert value to string:', error);
+                return '';
+            }
+        }
         return text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Safely escape JSON for use in JavaScript template literals
+     */
+    public static escapeJson(obj: any): string {
+        if (obj === null || obj === undefined) return '';
+        try {
+            const jsonString = JSON.stringify(obj);
+            // Don't display empty objects
+            if (jsonString === '{}' || jsonString === '[]') return '';
+            return this.escapeHtml(jsonString);
+        } catch (error) {
+            console.warn('Failed to stringify object for escaping:', error);
+            return '';
+        }
     }
 
     /**
