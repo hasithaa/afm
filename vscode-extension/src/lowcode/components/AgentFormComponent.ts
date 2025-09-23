@@ -70,14 +70,6 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
                     <p class="form-description">
                         Configure your agent's metadata, interface, and connections using the forms below.
                     </p>
-                    ${!readonly ? `
-                        <div class="form-actions">
-                            <button id="closeFormBtn" class="btn btn-secondary">
-                                <i class="codicon codicon-close"></i>
-                                Close
-                            </button>
-                        </div>
-                    ` : ''}
                 </div>
 
                 <!-- Form Navigation Tabs -->
@@ -129,13 +121,9 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
                         <i class="codicon codicon-save"></i>
                         Save Configuration
                     </button>
-                    <button class="btn btn-secondary" id="resetFormBtn" ${disabledAttr}>
-                        <i class="codicon codicon-discard"></i>
-                        Reset
-                    </button>
-                    <button class="btn btn-outline" id="exportMetadataBtn" ${disabledAttr}>
-                        <i class="codicon codicon-export"></i>
-                        Export JSON
+                    <button class="btn btn-secondary" id="closeFormBtn2" ${disabledAttr}>
+                        <i class="codicon codicon-close"></i>
+                        Close
                     </button>
                 </div>
             </div>
@@ -208,9 +196,6 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
 
             .form-header {
                 margin-bottom: 24px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
             }
 
             .form-actions {
@@ -538,13 +523,11 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
                     const cardView = document.getElementById('agent-card-view');
                     const formView = document.getElementById('agent-form-view');
                     const editConfigBtn = document.getElementById('edit-config-btn');
-                    const closeFormBtn = document.getElementById('closeFormBtn');
 
                     console.log('Elements found:', {
                         cardView: !!cardView,
                         formView: !!formView,
-                        editConfigBtn: !!editConfigBtn,
-                        closeFormBtn: !!closeFormBtn
+                        editConfigBtn: !!editConfigBtn
                     }); // Debug log
 
                     // Show form view when Edit Configuration is clicked
@@ -562,17 +545,6 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
                         });
                     } else {
                         console.error('Edit Configuration button not found!');
-                    }
-
-                    // Show card view when Close is clicked
-                    if (closeFormBtn) {
-                        closeFormBtn.addEventListener('click', function() {
-                            console.log('Close button clicked'); // Debug log
-                            if (cardView && formView) {
-                                formView.style.display = 'none';
-                                cardView.style.display = 'block';
-                            }
-                        });
                     }
                 }
                 
@@ -897,8 +869,7 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
 
             function initializeFormActions() {
                 const saveBtn = document.getElementById('saveMetadataBtn');
-                const resetBtn = document.getElementById('resetFormBtn');
-                const exportBtn = document.getElementById('exportMetadataBtn');
+                const closeBtn2 = document.getElementById('closeFormBtn2');
 
                 if (saveBtn) {
                     saveBtn.addEventListener('click', function() {
@@ -912,23 +883,14 @@ export class AgentFormComponent implements StyledComponent, ScriptedComponent {
                     });
                 }
 
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', function() {
-                        if (confirm('Are you sure you want to reset all form data?')) {
-                            resetForm();
-                        }
-                    });
-                }
-
-                if (exportBtn) {
-                    exportBtn.addEventListener('click', function() {
-                        const formData = collectFormData();
-                        const jsonStr = JSON.stringify(formData, null, 2);
-                        if (window.vscode) {
-                            window.vscode.postMessage({
-                                type: 'exportMetadata',
-                                data: jsonStr
-                            });
+                if (closeBtn2) {
+                    closeBtn2.addEventListener('click', function() {
+                        // Switch back to card view
+                        const cardView = document.getElementById('agent-card-view');
+                        const formView = document.getElementById('agent-form-view');
+                        if (cardView && formView) {
+                            formView.style.display = 'none';
+                            cardView.style.display = 'block';
                         }
                     });
                 }

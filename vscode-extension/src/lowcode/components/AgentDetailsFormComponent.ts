@@ -24,112 +24,114 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
         return `
             <div class="form-section">
                 <h5 class="section-title">
-                    <i class="codicon codicon-info"></i>
-                    Basic Information
-                </h5>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="agent-name">Agent Name <span class="required">*</span></label>
-                        <input type="text" id="agent-name" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(name)}"
-                               placeholder="e.g., Math Tutor" ${disabledAttr} required>
-                        <small class="form-text">Human-readable name for your agent</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="agent-namespace">Namespace</label>
-                        <input type="text" id="agent-namespace" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(namespace)}"
-                               placeholder="e.g., education, productivity" ${disabledAttr}>
-                        <small class="form-text">Category or domain for your agent</small>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="agent-description">Description</label>
-                    <textarea id="agent-description" class="form-control" rows="3" 
-                              placeholder="Brief description of your agent's purpose and capabilities" 
-                              ${disabledAttr}>${LowCodeUtils.escapeHtml(description)}</textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="agent-version">Version</label>
-                        <input type="text" id="agent-version" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(version)}"
-                               placeholder="1.0.0" pattern="\\d+\\.\\d+\\.\\d+" ${disabledAttr}>
-                        <small class="form-text">Semantic versioning (MAJOR.MINOR.PATCH)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="license">License</label>
-                        <input type="text" id="license" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(license)}"
-                               placeholder="e.g., MIT, Apache 2.0" ${disabledAttr}>
-                        <small class="form-text">License under which your agent is distributed</small>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="icon-url">Icon URL</label>
-                    <input type="url" id="icon-url" class="form-control" 
-                           value="${LowCodeUtils.escapeHtml(iconUrl)}"
-                           placeholder="https://example.com/icon.png" ${disabledAttr}>
-                    <small class="form-text">URL to an icon representing your agent</small>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h5 class="section-title">
                     <i class="codicon codicon-person"></i>
-                    Authors & Contributors
+                    Agent Configuration
                 </h5>
+                <p class="section-description">
+                    Configure your agent's basic information, authors, and provider details.
+                </p>
                 
-                <div class="authors-container">
-                    <div id="authors-list" class="authors-list">
-                        ${this.renderAuthors(authors)}
+                <!-- Basic Information -->
+                <div class="form-subsection">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="agent-name">Agent Name <span class="required">*</span></label>
+                            <input type="text" id="agent-name" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(name)}"
+                                   placeholder="e.g., Math Tutor" ${disabledAttr} required>
+                            <small class="form-text">Human-readable name for your agent</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="agent-namespace">Namespace</label>
+                            <input type="text" id="agent-namespace" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(namespace)}"
+                                   placeholder="e.g., education" ${disabledAttr}>
+                            <small class="form-text">Category or domain for your agent</small>
+                        </div>
                     </div>
-                    ${!readonly ? `
-                        <div class="add-author-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="author-name">Name</label>
-                                    <input type="text" id="author-name" class="form-control" placeholder="John Doe">
-                                </div>
-                                <div class="form-group">
-                                    <label for="author-email">Email</label>
-                                    <input type="email" id="author-email" class="form-control" placeholder="john@example.com">
-                                </div>
-                                <div class="form-group">
-                                    <button type="button" id="add-author-btn" class="btn btn-secondary">
-                                        <i class="codicon codicon-add"></i> Add
-                                    </button>
+
+                    <div class="form-group">
+                        <label for="agent-description">Description</label>
+                        <textarea id="agent-description" class="form-control" rows="3" 
+                                  placeholder="Brief description of your agent's purpose and capabilities" 
+                                  ${disabledAttr}>${LowCodeUtils.escapeHtml(description)}</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="agent-version">Version</label>
+                            <input type="text" id="agent-version" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(version)}"
+                                   placeholder="1.0.0" ${disabledAttr}>
+                            <small class="form-text">Semantic versioning (MAJOR.MINOR.PATCH)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="license">License</label>
+                            <input type="text" id="license" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(license)}"
+                                   placeholder="e.g., MIT, Apache 2.0" ${disabledAttr}>
+                            <small class="form-text">License under which your agent is distributed</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="icon-url">Icon URL</label>
+                        <input type="url" id="icon-url" class="form-control" 
+                               value="${LowCodeUtils.escapeHtml(iconUrl)}"
+                               placeholder="https://example.com/icon.png" ${disabledAttr}>
+                        <small class="form-text">URL to an icon representing your agent</small>
+                    </div>
+                </div>
+
+                <!-- Authors Section -->
+                <div class="form-subsection">
+                    <h6 class="subsection-title">Authors & Contributors</h6>
+                    
+                    <div class="authors-container">
+                        <div id="authors-list" class="authors-list">
+                            ${this.renderAuthors(authors)}
+                        </div>
+                        ${!readonly ? `
+                            <div class="add-author-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="author-name">Name</label>
+                                        <input type="text" id="author-name" class="form-control" placeholder="John Doe">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="author-email">Email</label>
+                                        <input type="email" id="author-email" class="form-control" placeholder="john@example.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="add-author-btn" class="btn btn-secondary">
+                                            <i class="codicon codicon-add"></i> Add
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h5 class="section-title">
-                    <i class="codicon codicon-organization"></i>
-                    Provider Information
-                </h5>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="provider-organization">Organization</label>
-                        <input type="text" id="provider-organization" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(provider.organization || '')}"
-                               placeholder="e.g., Your Company Name" ${disabledAttr}>
-                        <small class="form-text">Organization or company providing this agent</small>
+                        ` : ''}
                     </div>
-                    <div class="form-group">
-                        <label for="provider-url">Provider URL</label>
-                        <input type="url" id="provider-url" class="form-control" 
-                               value="${LowCodeUtils.escapeHtml(provider.url || '')}"
-                               placeholder="https://yourcompany.com" ${disabledAttr}>
-                        <small class="form-text">Website or URL for the provider</small>
+                </div>
+
+                <!-- Provider Information -->
+                <div class="form-subsection">
+                    <h6 class="subsection-title">Provider Information</h6>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="provider-organization">Organization</label>
+                            <input type="text" id="provider-organization" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(provider.organization || '')}"
+                                   placeholder="e.g., Your Company Name" ${disabledAttr}>
+                            <small class="form-text">Organization or company providing this agent</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="provider-url">Provider URL</label>
+                            <input type="url" id="provider-url" class="form-control" 
+                                   value="${LowCodeUtils.escapeHtml(provider.url || '')}"
+                                   placeholder="https://yourcompany.com" ${disabledAttr}>
+                            <small class="form-text">Website or URL for the provider</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -162,6 +164,57 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
     public getStyles(): string {
         return `
             /* Agent Details Form Styles */
+            .form-subsection {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid var(--vscode-panel-border);
+            }
+
+            .form-subsection:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+            .subsection-title {
+                color: var(--vscode-textLink-foreground);
+                margin-bottom: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .subsection-title:before {
+                content: "•";
+                color: var(--vscode-textLink-foreground);
+                font-weight: bold;
+            }
+
+            /* Fix text field overflow */
+            .form-control {
+                width: 100%;
+                min-width: 0; /* Allow flex items to shrink */
+                box-sizing: border-box;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 16px;
+            }
+
+            .form-group {
+                min-width: 0; /* Allow grid items to shrink */
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Authors container */
             .authors-container {
                 border: 1px solid var(--vscode-panel-border);
                 border-radius: 4px;
@@ -192,6 +245,7 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
                 padding: 8px 12px;
                 margin-bottom: 8px;
                 transition: background-color 0.2s;
+                min-width: 0; /* Allow flex items to shrink */
             }
 
             .author-card:hover {
@@ -200,17 +254,25 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
 
             .author-info {
                 flex: 1;
+                min-width: 0; /* Allow to shrink */
+                overflow: hidden;
             }
 
             .author-name {
                 font-weight: 500;
                 color: var(--vscode-editor-foreground);
                 margin-bottom: 2px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .author-email {
                 font-size: 0.9em;
                 color: var(--vscode-descriptionForeground);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .remove-author {
@@ -222,6 +284,7 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
                 border-radius: 3px;
                 opacity: 0.7;
                 transition: all 0.2s;
+                flex-shrink: 0;
             }
 
             .remove-author:hover {
@@ -234,6 +297,27 @@ export class AgentDetailsFormComponent implements StyledComponent, ScriptedCompo
                 gap: 8px;
                 margin-bottom: 0;
                 align-items: end;
+            }
+
+            .add-author-form .form-group:last-child {
+                display: flex;
+                align-items: flex-end;
+            }
+
+            /* Responsive design for smaller screens */
+            @media (max-width: 600px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .add-author-form .form-row {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
+
+                .add-author-form .form-group:last-child {
+                    align-items: stretch;
+                }
             }
         `;
     }

@@ -21,101 +21,101 @@ export class InterfaceFormComponent implements StyledComponent, ScriptedComponen
                     <i class="codicon codicon-symbol-interface"></i>
                     Interface Configuration
                 </h5>
+                <p class="section-description">
+                    Configure your agent's interface, input/output parameters, and service exposure settings.
+                </p>
                 
-                <div class="form-group">
-                    <label for="interface-type">Interface Type</label>
-                    <select id="interface-type" class="form-control" ${disabledAttr}>
-                        <option value="function" ${interfaceType === 'function' ? 'selected' : ''}>Function (callable within application)</option>
-                        <option value="service" ${interfaceType === 'service' ? 'selected' : ''}>Service (network-accessible)</option>
-                    </select>
-                    <small class="form-text">Functions are callable within applications, services are network-accessible</small>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h5 class="section-title">
-                    <i class="codicon codicon-arrow-right"></i>
-                    Input Parameters
-                </h5>
-                
-                <div class="parameters-container">
-                    <div class="parameters-list" id="input-parameters-list">
-                        <!-- Input parameters will be populated here -->
-                    </div>
-                    <button type="button" class="btn btn-outline add-parameter-btn" 
-                            id="add-input-param-btn" ${disabledAttr}>
-                        <i class="codicon codicon-add"></i>
-                        Add Input Parameter
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h5 class="section-title">
-                    <i class="codicon codicon-arrow-left"></i>
-                    Output Parameters
-                </h5>
-                
-                <div class="parameters-container">
-                    <div class="parameters-list" id="output-parameters-list">
-                        <!-- Output parameters will be populated here -->
-                    </div>
-                    <button type="button" class="btn btn-outline add-parameter-btn" 
-                            id="add-output-param-btn" ${disabledAttr}>
-                        <i class="codicon codicon-add"></i>
-                        Add Output Parameter
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-section service-exposure-section" id="service-exposure-section" style="display: none;">
-                <h5 class="section-title">
-                    <i class="codicon codicon-globe"></i>
-                    Service Exposure
-                </h5>
-                
-                <div class="form-group">
-                    <label for="http-path">HTTP Endpoint Path</label>
-                    <input type="text" id="http-path" class="form-control" 
-                           placeholder="/math-tutor" ${disabledAttr}>
-                    <small class="form-text">The URL path where this service will be accessible</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="auth-type">Authentication Type</label>
-                    <select id="auth-type" class="form-control" ${disabledAttr}>
-                        <option value="">None</option>
-                        <option value="oauth2">OAuth 2.0</option>
-                        <option value="api_key">API Key</option>
-                        <option value="bearer">Bearer Token</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="a2a-discoverable" ${disabledAttr}>
-                        Discoverable by other agents (A2A)
-                    </label>
-                </div>
-
-                <div class="form-row">
+                <!-- Interface Type -->
+                <div class="form-subsection">
                     <div class="form-group">
-                        <label for="agent-card-name">Agent Card Name</label>
-                        <input type="text" id="agent-card-name" class="form-control" 
-                               placeholder="Math Tutor Service" ${disabledAttr}>
-                    </div>
-                    <div class="form-group">
-                        <label for="agent-card-icon">Agent Card Icon</label>
-                        <input type="url" id="agent-card-icon" class="form-control" 
-                               placeholder="https://example.com/icon.png" ${disabledAttr}>
+                        <label for="interface-type">Interface Type</label>
+                        <select id="interface-type" class="form-control" ${disabledAttr}>
+                            <option value="function" ${interfaceType === 'function' ? 'selected' : ''}>Function (callable within application)</option>
+                            <option value="service" ${interfaceType === 'service' ? 'selected' : ''}>Service (network-accessible)</option>
+                        </select>
+                        <small class="form-text">Functions are callable within applications, services are network-accessible</small>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="agent-card-description">Agent Card Description</label>
-                    <textarea id="agent-card-description" class="form-control" rows="2" 
-                              placeholder="Description shown when other agents discover this service" 
-                              ${disabledAttr}></textarea>
+                <!-- Input Parameters -->
+                <div class="form-subsection">
+                    <h6 class="subsection-title">Input Parameters</h6>
+                    
+                    <div class="parameters-container">
+                        <div class="parameters-list" id="input-parameters-list">
+                            <!-- Input parameters will be populated here -->
+                        </div>
+                        <button type="button" class="btn btn-outline add-parameter-btn" 
+                                id="add-input-param-btn" ${disabledAttr}>
+                            <i class="codicon codicon-add"></i>
+                            Add Input Parameter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Parameters -->
+                <div class="form-subsection">
+                    <h6 class="subsection-title">Output Parameters</h6>
+                    
+                    <div class="parameters-container">
+                        <div class="parameters-list" id="output-parameters-list">
+                            <!-- Output parameters will be populated here -->
+                        </div>
+                        <button type="button" class="btn btn-outline add-parameter-btn" 
+                                id="add-output-param-btn" ${disabledAttr}>
+                            <i class="codicon codicon-add"></i>
+                            Add Output Parameter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Service Exposure (shown only when service type is selected) -->
+                <div class="form-subsection service-exposure-section" id="service-exposure-section" style="display: none;">
+                    <h6 class="subsection-title">Service Exposure</h6>
+                    
+                    <div class="form-group">
+                        <label for="http-path">HTTP Endpoint Path</label>
+                        <input type="text" id="http-path" class="form-control" 
+                               placeholder="/math-tutor" ${disabledAttr}>
+                        <small class="form-text">The URL path where this service will be accessible</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="auth-type">Authentication Type</label>
+                        <select id="auth-type" class="form-control" ${disabledAttr}>
+                            <option value="">None</option>
+                            <option value="oauth2">OAuth 2.0</option>
+                            <option value="api_key">API Key</option>
+                            <option value="bearer">Bearer Token</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="a2a-discoverable" ${disabledAttr}>
+                            Discoverable by other agents (A2A)
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="agent-card-name">Agent Card Name</label>
+                            <input type="text" id="agent-card-name" class="form-control" 
+                                   placeholder="Math Tutor Service" ${disabledAttr}>
+                        </div>
+                        <div class="form-group">
+                            <label for="agent-card-icon">Agent Card Icon</label>
+                            <input type="url" id="agent-card-icon" class="form-control" 
+                                   placeholder="https://example.com/icon.png" ${disabledAttr}>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="agent-card-description">Agent Card Description</label>
+                        <textarea id="agent-card-description" class="form-control" rows="2" 
+                                  placeholder="Description shown when other agents discover this service" 
+                                  ${disabledAttr}></textarea>
+                    </div>
                 </div>
             </div>
         `;
@@ -124,6 +124,34 @@ export class InterfaceFormComponent implements StyledComponent, ScriptedComponen
     public getStyles(): string {
         return `
             /* Interface Form Styles */
+            .form-subsection {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid var(--vscode-panel-border);
+            }
+
+            .form-subsection:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+            .subsection-title {
+                color: var(--vscode-textLink-foreground);
+                margin-bottom: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .subsection-title:before {
+                content: "•";
+                color: var(--vscode-textLink-foreground);
+                font-weight: bold;
+            }
+
             .parameters-container {
                 border: 1px solid var(--vscode-panel-border);
                 border-radius: 4px;
